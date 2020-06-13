@@ -226,7 +226,7 @@ def main():
     train_dataset = get_dataset(data_args, tokenizer=tokenizer) if training_args.do_train else None
     eval_dataset = get_dataset(data_args, tokenizer=tokenizer, evaluate=True) if training_args.do_eval else None
 
-    if len(data_args) > 0:
+    if len(data_args.weighted_vocab) > 0:
         weighted_vocab = []
         with open(data_args.weighted_vocab, "r", encoding="utf-8") as f:
             for line in tqdm(f.readlines()):
