@@ -114,7 +114,7 @@ class DataTrainingArguments:
     overwrite_cache: bool = field(
         default=False, metadata={"help": "Overwrite the cached training and evaluation sets"}
     )
-    weighted_vocab: str = filed(
+    weighted_vocab: str = field(
         default="", metadata={"help": "weighted vocab for target language masking"}
     )
 
