@@ -33,6 +33,7 @@ from transformers import (
     AutoModelWithLMHead,
     AutoTokenizer,
     DataCollatorForLanguageModeling,
+    DataCollatorForWeightedLanguageModeling
     HfArgumentParser,
     LineByLineTextDataset,
     PreTrainedTokenizer,
@@ -112,6 +113,9 @@ class DataTrainingArguments:
     )
     overwrite_cache: bool = field(
         default=False, metadata={"help": "Overwrite the cached training and evaluation sets"}
+    )
+    weighted_vocab: str = filed(
+        default="", metadata={"help": "weighted vocab for target language masking"}
     )
 
 
@@ -221,9 +225,22 @@ def main():
 
     train_dataset = get_dataset(data_args, tokenizer=tokenizer) if training_args.do_train else None
     eval_dataset = get_dataset(data_args, tokenizer=tokenizer, evaluate=True) if training_args.do_eval else None
-    data_collator = DataCollatorForLanguageModeling(
-        tokenizer=tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability
-    )
+
+    if len(data_args) > 0:
+        weighted_vocab = []
+        with open(data_args.weighted_vocab, "r", encoding="utf-8") as f:
+            for line in tqdm(f.readlines()):
+                line = float(line.strip())
+                weighted_vocab.append(line)
+
+        assert lne(weighted_vocab) == len(tokenizer.vocab)
+        data_collator = DataCollatorForWeightedLanguageModeling(
+            tokenizer = tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability, weighted_vocab=weighted_vocab
+        )
+    else:
+        data_collator = DataCollatorForLanguageModeling(
+            tokenizer=tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability
+        )
 
     # Initialize our Trainer
     trainer = Trainer(
