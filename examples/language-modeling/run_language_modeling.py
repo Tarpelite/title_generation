@@ -33,7 +33,7 @@ from transformers import (
     AutoModelWithLMHead,
     AutoTokenizer,
     DataCollatorForLanguageModeling,
-    DataCollatorForWeightedLanguageModeling
+    DataCollatorForWeightedLanguageModeling,
     HfArgumentParser,
     LineByLineTextDataset,
     PreTrainedTokenizer,
