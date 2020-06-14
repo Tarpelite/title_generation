@@ -183,11 +183,11 @@ class DataCollatorForWeightedLanguageModeling(DataCollator):
         probability_matrix = torch.full(labels.shape, self.mlm_probability)
 
         # Inevitable O(n^2) index
-        for i in len(inputs):
-            for j in len(inputs[i]):
+        for i in range(len(inputs)):
+            for j in range(len(inputs[i])):
                 input_id = int(inputs[i][j])
                 probability_matrix[i][j]  = (1 + self.weighted_vocab[input_id]) * self.mlm_probability
-                
+
                 
         special_tokens_mask = [
             self.tokenizer.get_special_tokens_mask(val, already_has_special_tokens=True) for val in labels.tolist()
