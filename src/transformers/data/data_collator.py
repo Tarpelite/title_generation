@@ -190,7 +190,11 @@ class DataCollatorForWeightedLanguageModeling(DataCollator):
                 probs.append( 1.0000 + float(self.weighted_vocab[input_id])) # not negative
             sum_prob = sum(probs)
             for j in range(len(inputs[i])):
-                probability_matrix[i][j]  = (probs[j]*1.0000/sum_prob) * self.mlm_probability
+                weighted_prob= (probs[j]*1.0000/sum_prob) * self.mlm_probability
+                probability_matrix[i][j] = weighted_prob
+                if i < 5:
+                    print(weighted_prob)
+            print()
                 
         special_tokens_mask = [
             self.tokenizer.get_special_tokens_mask(val, already_has_special_tokens=True) for val in labels.tolist()
