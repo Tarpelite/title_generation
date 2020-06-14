@@ -184,9 +184,13 @@ class DataCollatorForWeightedLanguageModeling(DataCollator):
 
         # Inevitable O(n^2) index
         for i in range(len(inputs)):
+            probs = []
             for j in range(len(inputs[i])):
-                input_id = int(inputs[i][j])
-                probability_matrix[i][j]  = (1 + self.weighted_vocab[input_id]) * self.mlm_probability
+                probs.append( 1.0000 + float(self.weighted_vocab[input_id])) # not negative
+            
+            sum_prob = sum(probs)
+            for j in range(len(inputs[i])):
+                probability_matrix[i][j]  = (probs[i]*1.0000/sum_prob) * self.mlm_probability
 
                 
         special_tokens_mask = [
