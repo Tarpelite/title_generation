@@ -25,6 +25,7 @@ import math
 import os
 from dataclasses import dataclass, field
 from typing import Optional
+from tqdm import tqdm
 
 from transformers import (
     CONFIG_MAPPING,
