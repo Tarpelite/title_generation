@@ -189,9 +189,10 @@ class DataCollatorForWeightedLanguageModeling(DataCollator):
                 input_id = int(inputs[i][j])
                 probs.append( 1.0000 + float(self.weighted_vocab[input_id])) # not negative
             sum_prob = sum(probs)
+            
             weighted_probs = []
             for j in range(len(inputs[i])):
-                weighted_prob= (probs[j]*1.0000/sum_prob) * self.mlm_probability
+                weighted_prob= (probs[j]*sum_prob*1.000/len(inputs[i])) * self.mlm_probability
                 probability_matrix[i][j] = weighted_prob
                 weighted_probs.append(weighted_prob)
             print("max_prob:{} min_prob:{}".format(max(weighted_probs), min(weighted_probs)))
