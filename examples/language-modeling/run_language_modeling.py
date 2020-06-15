@@ -26,7 +26,6 @@ import os
 from dataclasses import dataclass, field
 from typing import Optional
 from tqdm import tqdm
-q
 from transformers import (
     CONFIG_MAPPING,
     MODEL_WITH_LM_HEAD_MAPPING,
