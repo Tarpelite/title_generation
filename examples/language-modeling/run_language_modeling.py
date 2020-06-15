@@ -43,6 +43,8 @@ from transformers import (
     TrainingArguments,
     set_seed,
 )
+from pudb import set_trace
+set_trace()
 
 
 logger = logging.getLogger(__name__)
@@ -234,7 +236,7 @@ def main():
                 line = float(line.strip())
                 weighted_vocab.append(line)
         assert len(weighted_vocab) == len(tokenizer.vocab)
-        
+
         data_collator = DataCollatorForWeightedLanguageModeling(
             tokenizer = tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability, weighted_vocab=weighted_vocab
         )
