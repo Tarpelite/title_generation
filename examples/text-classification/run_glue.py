@@ -164,6 +164,7 @@ def main():
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
+        tb_writer=None,
         compute_metrics=build_compute_metrics_fn(data_args.task_name),
     )
 
