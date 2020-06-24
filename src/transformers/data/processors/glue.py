@@ -328,6 +328,7 @@ class CLSProcessor(DataProcessor):
     
     def _create_examples(self, lines, set_type):
         test_mode = set_type == "test"
+        examples = []
         for (i, line) in enumerate(lines):
             guid = "%s-%s" % (set_type, i)
             text_a = line[0]
