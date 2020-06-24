@@ -406,9 +406,9 @@ class Trainer:
                 find_unused_parameters=True,
             )
 
-        if self.tb_writer is not None:
-            self.tb_writer.add_text("args", self.args.to_json_string())
-            self.tb_writer.add_hparams(self.args.to_sanitized_dict(), metric_dict={})
+        # if self.tb_writer is not None:
+        #     self.tb_writer.add_text("args", self.args.to_json_string())
+            # self.tb_writer.add_hparams(self.args.to_sanitized_dict(), metric_dict={})
 
         # Train!
         if is_torch_tpu_available():
