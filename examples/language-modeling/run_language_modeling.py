@@ -31,15 +31,19 @@ from transformers import (
     MODEL_WITH_LM_HEAD_MAPPING,
     AutoConfig,
     AutoModelWithLMHead,
+    AutoModelForSequenceClassification,
     AutoTokenizer,
     DataCollatorForLanguageModeling,
     DataCollatorForWeightedLanguageModeling,
+    DataCollatorForSelectLM,
     HfArgumentParser,
     LineByLineTextDataset,
+    FullyLineByLineTextDatset,
     PreTrainedTokenizer,
     TextDataset,
     Trainer,
     TrainingArguments,
+    MaskSelector,
     set_seed,
 )
 # from pudb import set_trace
@@ -79,6 +83,13 @@ class ModelArguments:
         default=None, metadata={"help": "Where do you want to store the pretrained models downloaded from s3"}
     )
 
+    cls_model_name_or_path: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": "The model checkpoint for weights initialization. Leave None if you want to train a model from scratch."
+        },
+    )
+
 
 @dataclass
 class DataTrainingArguments:
@@ -105,6 +116,13 @@ class DataTrainingArguments:
         default=0.15, metadata={"help": "Ratio of tokens to mask for masked language modeling loss"}
     )
 
+    mlm_sample_times: int = field(
+        default = 1,
+        metadata={
+            "help": "determine the sample times of mlm if 1 is reduced to the normal mlm"
+        }
+    )
+
     block_size: int = field(
         default=-1,
         metadata={
@@ -124,7 +142,10 @@ class DataTrainingArguments:
 def get_dataset(args: DataTrainingArguments, tokenizer: PreTrainedTokenizer, evaluate=False):
     file_path = args.eval_data_file if evaluate else args.train_data_file
     if args.line_by_line:
-        return LineByLineTextDataset(tokenizer=tokenizer, file_path=file_path, block_size=args.block_size)
+        if args.mlm_sample_times > 1:
+            return FullyLineByLineTextDataset(tokenizer=tokenizer, file_path=file_path, block_size=args.block_size)
+        else:
+            return LineByLineTextDataset(tokenizer=tokenizer, file_path=file_path, block_size=args.block_size)
     else:
         return TextDataset(
             tokenizer=tokenizer, file_path=file_path, block_size=args.block_size, overwrite_cache=args.overwrite_cache
@@ -208,8 +229,20 @@ def main():
     else:
         logger.info("Training new model from scratch")
         model = AutoModelWithLMHead.from_config(config)
+    
+    if model_args.cls_model_name_or_path:
+        cls_model = AutoModelForSequenceClassification.from_pretrained(
+            model_args.cls_model_name_or_path,
+            from_tf=bool(".ckpt" in model_args.cls_model_name_or_path),
+            num_labels = 2,
+            config=config,
+            cache_dir=model_args.cache_dir,
+        )
+        cls_model.resize_token_embeddings(len(tokenizer))
+        mask_selector = MaskSelector(cls_model)
 
     model.resize_token_embeddings(len(tokenizer))
+    
 
     if config.model_type in ["bert", "roberta", "distilbert", "camembert"] and not data_args.mlm:
         raise ValueError(
@@ -239,10 +272,15 @@ def main():
         data_collator = DataCollatorForWeightedLanguageModeling(
             tokenizer = tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability, weighted_vocab=weighted_vocab
         )
+    elif data_args.mlm_sample_times > 1:
+        data_collator = DataCollatorForSelectLM(
+            tokenizer = tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability, mlm_sample_times=data_args.mlm_sample_times, selector = mask_selector
+        )
     else:
         data_collator = DataCollatorForLanguageModeling(
             tokenizer=tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability
         )
+    
 
     # Initialize our Trainer
     trainer = Trainer(

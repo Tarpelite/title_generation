@@ -6,11 +6,54 @@ import time
 import torch
 from filelock import FileLock
 from torch.utils.data.dataset import Dataset
+import numpy as np
 
 from ...tokenization_utils import PreTrainedTokenizer
+from ...modeling_utils import PreTrainedModel
+from ...training_args import TrainingArguments
+from ...trainer import set_seed
 
 
 logger = logging.getLogger(__name__)
+
+
+class MaskSelector:
+    model: PreTrainedModel
+
+    def __init__(
+        self,
+        model: PreTrainedModel,
+        args: TrainingArguments):
+
+        self.model = model.to(args.device)
+        self.args = args
+
+        set_seed(self.args.seed)
+    
+    def predict(
+        self, 
+        mask_batch):
+        #mask_batch size  [batch_size, seq_len]
+        model = self.model
+        if self.args.n_gpu > 1:
+            model = torch.nn.DataParallel(model)
+        else:
+            model = self.model
+        model.eval()
+        for k, v in mask_batch.items():
+            mask_batch[k] = v.to(self.args.device)
+        with torch.no_grad():
+            outputs = model(**mask_batch)
+            logits = outputs[0]
+        
+        # src-0,tgt-1
+        preds = logits.detach().numpy()
+        preds = [x[1] for x in preds]
+        print("max_logits:{} min_logits:{}".format(max(preds), min(preds)))
+        return np.argmin(preds)
+
+        
+        
 
 
 class TextDataset(Dataset):
@@ -99,3 +142,25 @@ class LineByLineTextDataset(Dataset):
 
     def __getitem__(self, i) -> torch.Tensor:
         return torch.tensor(self.examples[i], dtype=torch.long)
+
+class FullyLineByLineTextDataset(Dataset):
+
+    def __init__(self, tokenizer: PreTrainedTokenizer, file_path: str, block_size: int):
+        assert os.path.isfile(file_path)
+        # Here, we do not cache the features, operating under the assumption
+        # that we will soon use fast multithreaded tokenizers from the
+        # `tokenizers` repo everywhere =)
+        logger.info("Creating features from dataset file at %s", file_path)
+
+        with open(file_path, encoding="utf-8") as f:
+            lines = [line for line in f.read().splitlines() if (len(line) > 0 and not line.isspace())]
+
+        batch_encoding = tokenizer.batch_encode_plus(lines, add_special_tokens=True, max_length=block_size)
+        self.features = batch_encoding
+
+    def __len__(self):
+        return len(self.features)
+
+    def __getitem__(self, i) -> torch.Tensor:
+        return self.features[i]
+
