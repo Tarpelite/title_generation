@@ -7,7 +7,8 @@ from torch.nn.utils.rnn import pad_sequence
 
 from ..tokenization_utils import PreTrainedTokenizer
 from ..modeling_utils import PreTrainedModel
-from transformers import MaskSelector
+from ..data.datasets.language_modeling import MaskSelector
+from tqdm import tqdm
 
 
 class DataCollator(ABC):
