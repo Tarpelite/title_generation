@@ -242,8 +242,7 @@ class DataCollatorForSelectLM(DataCollator):
         all_inputs = []
         all_labels = []
         for instance in tqdm(examples):
-            instance_inputs = []
-            all_labels = []
+            
             batch = {}
             for k, v in vars(instance).items():
                 batch[k] = torch.tensor([getattr(instance, k) for _ in range(self.mlm_sample_times)], dtype=torch.long)
