@@ -248,18 +248,15 @@ class DataCollatorForSelectLM(DataCollator):
                 batch[k] = torch.tensor([getattr(instance, k) for _ in range(self.mlm_sample_times)], dtype=torch.long)
 
             for _ in range(self.mlm_sample_times):
-                inputs, labels = self.mask_tokens(instance["input_ids"])
+                inputs, labels = self.mask_tokens(batch["input_ids"])
 
-            instance_inputs.append(inputs)
 
-            batch["input_ids"] = torch.stack(instance_inputs, dim=0)
-            all_labels.append(labels)
             out = self.selector(**batch)
-            selected_instance = instance_inputs[out]
+            selected_instance = batch["input_ids"][out]
             all_inputs.append(selected_instance)
         return {
             "input_ids":torch.stack(all_inputs, dim=0),
-            "labels": torch.stack(all_labels, dim=0)
+            "labels": labels
         }
 
         # if self.mlm:
