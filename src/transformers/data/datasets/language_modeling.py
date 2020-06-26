@@ -11,6 +11,7 @@ import numpy as np
 from ...tokenization_utils import PreTrainedTokenizer
 from ...modeling_utils import PreTrainedModel
 from ...training_args import TrainingArguments
+from glue import glue_convert_examples_to_features
 import random
 import json
 import copy
@@ -183,18 +184,58 @@ class InputFeatures(object):
 
 class FullyLineByLineTextDataset(Dataset):
 
-    def __init__(self, tokenizer: PreTrainedTokenizer, file_path: str, block_size: int):
-        assert os.path.isfile(file_path)
-        # Here, we do not cache the features, operating under the assumption
-        # that we will soon use fast multithreaded tokenizers from the
-        # `tokenizers` repo everywhere =)
-        logger.info("Creating features from dataset file at %s", file_path)
+    def __init__(
+        self, 
+        tokenizer: PreTrainedTokenizer, 
+        file_path: str, 
+        block_size: int,
+        cache_dir= Optional[str]= None):
 
-        with open(file_path, encoding="utf-8") as f:
-            lines = [line for line in f.read().splitlines() if (len(line) > 0 and not line.isspace())]
+        cached_features_file = os.path.join(
+            cache_dir if cache_dir is not None else args.data_dir,
+            "cached_{}_{}_{}_{}".format(
+                mode.value, tokenizer.__class__.__name__, str(args.max_seq_length), args.task_name,
+            ),
+        )
+        lock_path = cached_features_file + ".lock"
+        with FileLock(lock_path):
 
-        batch_encoding = tokenizer.batch_encode_plus(lines, add_special_tokens=True, max_length=block_size)
-        self.features = batch_encoding
+            if os.path.exists(cached_features_file) and not args.overwrite_cache:
+                start = time.time()
+                self.features = torch.load(cached_features_file)
+                logger.info(
+                    f"Loading features from cached file {cached_features_file} [took %.3f s]", time.time() - start
+                )
+            else:
+                assert os.path.isfile(file_path)
+                # Here, we do not cache the features, operating under the assumption
+                # that we will soon use fast multithreaded tokenizers from the
+                # `tokenizers` repo everywhere =)
+                logger.info("Creating features from dataset file at %s", file_path)
+
+                with open(file_path, encoding="utf-8") as f:
+                    lines = [line for line in f.read().splitlines() if (len(line) > 0 and not line.isspace())]
+
+                examples = []
+                for (i, line) in enumerate(lines):
+                    guid = "%s-%s" % (set_type, i)
+                    text_a = line
+                    label = "0"
+                    examples.append(InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
+                # batch_encoding = tokenizer.batch_encode_plus(lines, add_special_tokens=True, max_length=block_size)
+                self.features = glue_convert_examples_to_features(
+                            examples,
+                            tokenizer,
+                            max_length=200,
+                            label_list=["0", "1"],
+                            output_mode="classification",
+                        )
+                start = time.time()
+                torch.save(self.features, cached_features_file)
+                # ^ This seems to take a lot of time so I want to investigate why and how we can improve.
+                logger.info(
+                    "Saving features into cached file %s [took %.3f s]", cached_features_file, time.time() - start
+                )
 
     def __len__(self):
         return len(self.features)
