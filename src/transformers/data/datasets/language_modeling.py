@@ -170,45 +170,44 @@ class FullyLineByLineTextDataset(Dataset):
             ),
         )
         lock_path = cached_features_file + ".lock"
-        with FileLock(lock_path):
+    
+        if os.path.exists(cached_features_file) :
+            start = time.time()
+            self.features = torch.load(cached_features_file)
+            logger.info(
+                f"Loading features from cached file {cached_features_file} [took %.3f s]", time.time() - start
+            )
+        else:
+            assert os.path.isfile(file_path)
+            # Here, we do not cache the features, operating under the assumption
+            # that we will soon use fast multithreaded tokenizers from the
+            # `tokenizers` repo everywhere =)
+            logger.info("Creating features from dataset file at %s", file_path)
 
-            if os.path.exists(cached_features_file) :
-                start = time.time()
-                self.features = torch.load(cached_features_file)
-                logger.info(
-                    f"Loading features from cached file {cached_features_file} [took %.3f s]", time.time() - start
-                )
-            else:
-                assert os.path.isfile(file_path)
-                # Here, we do not cache the features, operating under the assumption
-                # that we will soon use fast multithreaded tokenizers from the
-                # `tokenizers` repo everywhere =)
-                logger.info("Creating features from dataset file at %s", file_path)
+            with open(file_path, encoding="utf-8") as f:
+                lines = [line for line in f.read().splitlines() if (len(line) > 0 and not line.isspace())]
 
-                with open(file_path, encoding="utf-8") as f:
-                    lines = [line for line in f.read().splitlines() if (len(line) > 0 and not line.isspace())]
-
-                examples = []
-                for (i, line) in enumerate(lines):
-                    guid = "%s-%s" % ("train", i)
-                    text_a = line
-                    label = "0"
-                    examples.append(InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
-                # batch_encoding = tokenizer.batch_encode_plus(lines, add_special_tokens=True, max_length=block_size)
-                self.features = glue_convert_examples_to_features(
-                            examples,
-                            tokenizer,
-                            max_length=200,
-                            label_list=["0", "1"],
-                            output_mode="classification",
-                            task="cola"
-                        )
-                start = time.time()
-                torch.save(self.features, cached_features_file)
-                # ^ This seems to take a lot of time so I want to investigate why and how we can improve.
-                logger.info(
-                    "Saving features into cached file %s [took %.3f s]", cached_features_file, time.time() - start
-                )
+            examples = []
+            for (i, line) in enumerate(lines):
+                guid = "%s-%s" % ("train", i)
+                text_a = line
+                label = "0"
+                examples.append(InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
+            # batch_encoding = tokenizer.batch_encode_plus(lines, add_special_tokens=True, max_length=block_size)
+            self.features = glue_convert_examples_to_features(
+                        examples,
+                        tokenizer,
+                        max_length=200,
+                        label_list=["0", "1"],
+                        output_mode="classification",
+                        task="cola"
+                    )
+            start = time.time()
+            torch.save(self.features, cached_features_file)
+            # ^ This seems to take a lot of time so I want to investigate why and how we can improve.
+            logger.info(
+                "Saving features into cached file %s [took %.3f s]", cached_features_file, time.time() - start
+            )
 
     def __len__(self):
         return len(self.features)
