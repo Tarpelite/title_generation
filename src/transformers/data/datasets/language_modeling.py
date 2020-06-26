@@ -7,7 +7,7 @@ import torch
 from filelock import FileLock
 from torch.utils.data.dataset import Dataset
 import numpy as np
-
+from typing import Optional
 from ...tokenization_utils import PreTrainedTokenizer
 from ...modeling_utils import PreTrainedModel
 from ...training_args import TrainingArguments
@@ -192,15 +192,15 @@ class FullyLineByLineTextDataset(Dataset):
         cache_dir: Optional[str] = None):
 
         cached_features_file = os.path.join(
-            cache_dir if cache_dir is not None else args.data_dir,
+            cache_dir if cache_dir is not None else None,
             "cached_{}_{}_{}_{}".format(
-                mode.value, tokenizer.__class__.__name__, str(args.max_seq_length), args.task_name,
+                "select_lm", tokenizer.__class__.__name__, "200", "select_lm",
             ),
         )
         lock_path = cached_features_file + ".lock"
         with FileLock(lock_path):
 
-            if os.path.exists(cached_features_file) and not args.overwrite_cache:
+            if os.path.exists(cached_features_file) :
                 start = time.time()
                 self.features = torch.load(cached_features_file)
                 logger.info(
