@@ -38,7 +38,7 @@ from transformers import (
     DataCollatorForSelectLM,
     HfArgumentParser,
     LineByLineTextDataset,
-    FullyLineByLineTextDatset,
+    FullyLineByLineTextDataset,
     PreTrainedTokenizer,
     TextDataset,
     Trainer,
