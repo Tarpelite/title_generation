@@ -259,6 +259,8 @@ class DataCollatorForSelectLM(DataCollator):
             out = self.selector.predict(selector_input)
             selected_instance = batch["input_ids"][out]
             all_inputs.append(selected_instance)
+        print(len(all_innputs), all_inputs[0].shape)
+        print(labels.shape)
         return {
             "input_ids":torch.stack(all_inputs, dim=0),
             "labels": labels
