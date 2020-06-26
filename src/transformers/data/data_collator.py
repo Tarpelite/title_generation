@@ -254,7 +254,6 @@ class DataCollatorForSelectLM(DataCollator):
                 "input_ids":inputs,
                 "attention_mask":batch["attention_mask"],
                 "token_type_ids":batch["token_type_ids"],
-                "labels":None
             }
 
             out = self.selector.predict(selector_input)
