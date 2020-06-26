@@ -250,8 +250,14 @@ class DataCollatorForSelectLM(DataCollator):
             for _ in range(self.mlm_sample_times):
                 inputs, labels = self.mask_tokens(batch["input_ids"])
 
+            selector_input = {
+                "input_ids":inputs,
+                "attention_mask":batch["attention_mask"],
+                "token_type_ids":batch["token_type_ids"],
+                "labels":None
+            }
 
-            out = self.selector.predict(batch)
+            out = self.selector.predict(selector_input)
             selected_instance = batch["input_ids"][out]
             all_inputs.append(selected_instance)
         return {
