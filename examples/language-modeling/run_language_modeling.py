@@ -231,10 +231,15 @@ def main():
         model = AutoModelWithLMHead.from_config(config)
     
     if model_args.cls_model_name_or_path:
+        cls_config = AutoConfig.from_pretrained(
+            model_args.cls_model_name_or_path,
+            num_labels=2,
+            finetuning_task="cola",
+            cache_dir=model_args.cache_dir,
+        )
         cls_model = AutoModelForSequenceClassification.from_pretrained(
             model_args.cls_model_name_or_path,
             from_tf=bool(".ckpt" in model_args.cls_model_name_or_path),
-            num_labels = 2,
             config=config,
             cache_dir=model_args.cache_dir,
         )
