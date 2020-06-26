@@ -58,7 +58,7 @@ class MaskSelector:
         # src-0,tgt-1
         preds = logits.detach().cpu().numpy()
         preds = [x[1] for x in preds]
-        print("max_logits:{} min_logits:{}".format(max(preds), min(preds)))
+        # print("max_logits:{} min_logits:{}".format(max(preds), min(preds)))
         return np.argmin(preds)
 
         
