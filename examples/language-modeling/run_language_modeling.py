@@ -244,7 +244,7 @@ def main():
             cache_dir=model_args.cache_dir,
         )
         cls_model.resize_token_embeddings(len(tokenizer))
-        mask_selector = MaskSelector(training_args, cls_model)
+        mask_selector = MaskSelector(cls_model,training_args)
 
     model.resize_token_embeddings(len(tokenizer))
     
