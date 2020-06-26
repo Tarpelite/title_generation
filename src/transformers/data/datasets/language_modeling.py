@@ -11,7 +11,7 @@ from typing import Optional
 from ...tokenization_utils import PreTrainedTokenizer
 from ...modeling_utils import PreTrainedModel
 from ...training_args import TrainingArguments
-from glue import glue_convert_examples_to_features
+from .glue import glue_convert_examples_to_features
 import random
 import json
 import copy
