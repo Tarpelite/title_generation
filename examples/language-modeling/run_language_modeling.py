@@ -139,7 +139,7 @@ class DataTrainingArguments:
     )
 
 
-def get_dataset(args: DataTrainingArguments, tokenizer: PreTrainedTokenizer, , model_args:ModelArguments, evaluate=False):
+def get_dataset(args: DataTrainingArguments, tokenizer: PreTrainedTokenizer,model_args:ModelArguments, evaluate=False):
     file_path = args.eval_data_file if evaluate else args.train_data_file
     if args.line_by_line:
         if args.mlm_sample_times > 1:
