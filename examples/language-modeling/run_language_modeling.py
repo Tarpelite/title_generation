@@ -240,7 +240,7 @@ def main():
         cls_model = AutoModelForSequenceClassification.from_pretrained(
             model_args.cls_model_name_or_path,
             from_tf=bool(".ckpt" in model_args.cls_model_name_or_path),
-            config=config,
+            config=cls_config,
             cache_dir=model_args.cache_dir,
         )
         cls_model.resize_token_embeddings(len(tokenizer))
