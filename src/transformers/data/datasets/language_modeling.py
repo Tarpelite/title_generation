@@ -11,8 +11,13 @@ import numpy as np
 from ...tokenization_utils import PreTrainedTokenizer
 from ...modeling_utils import PreTrainedModel
 from ...training_args import TrainingArguments
-from ...trainer import set_seed
 
+
+def set_seed(seed: int):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
 
 logger = logging.getLogger(__name__)
 
