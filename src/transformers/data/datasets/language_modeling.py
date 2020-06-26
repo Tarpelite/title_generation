@@ -229,6 +229,7 @@ class FullyLineByLineTextDataset(Dataset):
                             max_length=200,
                             label_list=["0", "1"],
                             output_mode="classification",
+                            task="cola"
                         )
                 start = time.time()
                 torch.save(self.features, cached_features_file)
