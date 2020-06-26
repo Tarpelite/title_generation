@@ -189,7 +189,7 @@ class FullyLineByLineTextDataset(Dataset):
         tokenizer: PreTrainedTokenizer, 
         file_path: str, 
         block_size: int,
-        cache_dir= Optional[str]= None):
+        cache_dir: Optional[str] = None):
 
         cached_features_file = os.path.join(
             cache_dir if cache_dir is not None else args.data_dir,
