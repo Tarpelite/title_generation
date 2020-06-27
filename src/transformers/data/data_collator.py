@@ -257,6 +257,14 @@ class DataCollatorForSelectLM(DataCollator):
 
             out = self.selector.predict(selector_input)
             selected_instance = batch["input_ids"][out]
+            # show examples
+            selected_inputs = selected_instance.detach().cpu().numpy()
+            selected_labels = selected_labels.detach().cpu().numpy()
+
+            print("mask inputs : %s".format(" ".join([self.tokenizer._convert_id_to_token(x) for x in selected_inputs])))
+
+            print("origin inputs : %s".format(" ".join([self.tokenizer._convert_id_to_token(x) for x in selected_labels])))
+            
             all_inputs.append(selected_instance)
             all_labels.append(labels[0])
         # print(len(all_inputs), all_inputs[0].shape)
