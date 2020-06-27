@@ -246,9 +246,8 @@ class DataCollatorForSelectLM(DataCollator):
             for k, v in vars(instance).items():
                 batch[k] = torch.tensor([getattr(instance, k) for _ in range(self.mlm_sample_times)], dtype=torch.long)
 
-            for _ in range(self.mlm_sample_times):
-                inputs, labels = self.mask_tokens(batch["input_ids"])
-
+            
+            inputs, labels = self.mask_tokens(batch["input_ids"])
             selector_input = {
                 "input_ids":inputs,
                 "attention_mask":batch["attention_mask"],
