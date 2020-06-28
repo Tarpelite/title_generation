@@ -59,7 +59,7 @@ class MaskSelector:
         preds = logits.detach().cpu().numpy()
         preds = [x[1] for x in preds]
         # print("max_logits:{} min_logits:{}".format(max(preds), min(preds)))
-        return np.argmin(preds)
+        return np.argmax(preds)
 
         
         
@@ -197,7 +197,7 @@ class FullyLineByLineTextDataset(Dataset):
             self.features = glue_convert_examples_to_features(
                         examples,
                         tokenizer,
-                        max_length=200,
+                        max_length=512,
                         label_list=["0", "1"],
                         output_mode="classification",
                         task="cola"
