@@ -333,7 +333,8 @@ class CLSProcessor(DataProcessor):
             guid = "%s-%s" % (set_type, i)
             text_a = line[0]
             label = None if test_mode else line[1]
-            examples.append(InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
+            examples.append(InputExample(guid=guid, text_a=text_a, text_b=None, label=label))      
+            
         return examples
 
 class Sst2Processor(DataProcessor):
