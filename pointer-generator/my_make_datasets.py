@@ -270,7 +270,7 @@ if __name__ == '__main__':
         help="Path to directory to contain the .bin files",
         required=True)
 
-    actions = parser.add_mutually_exclusive_group("Set of actions")
+    actions = parser.add_mutually_exclusive_group()
     actions.add_argument(
         "--only_tokenize_fulltext",
         help="Only tokenize full text documents",
