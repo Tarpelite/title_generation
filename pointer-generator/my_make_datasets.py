@@ -164,7 +164,7 @@ def tokenize_documents(fulltext_dir, summary_dir, tokenized_documents_dir,
 
 def read_text_file(text_file):
     """Read a text file and tokenize to sentences"""
-    with open(text_file, "r") as f:
+    with open(text_file, "r", encoding="utf-8") as f:
         lines = sent_tokenize(f.read())
     return lines
 
