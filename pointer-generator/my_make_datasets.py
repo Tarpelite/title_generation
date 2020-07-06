@@ -243,7 +243,7 @@ def write_to_bin(out_file, fulltext_docs, summary_docs, makevocab=False):
     # write vocab to file
     if makevocab:
         print("Writing vocab file...")
-        with open(os.path.join(FINISHED_FILES_DIR, "vocab"), 'w') as writer:
+        with open(os.path.join(FINISHED_FILES_DIR, "vocab"), 'w+', encoding="utf-8") as writer:
             for word, count in vocab_counter.most_common(VOCAB_SIZE):
                 writer.write(word + ' ' + str(count) + '\n')
         print("Finished writing vocab file")
