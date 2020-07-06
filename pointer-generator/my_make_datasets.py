@@ -338,4 +338,4 @@ if __name__ == '__main__':
         #     fulltext_docs_val,
         #     summary_docs_val,
         #     makevocab=False)
-        chunk_all()
+        # chunk_all()
