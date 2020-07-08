@@ -154,7 +154,7 @@ def get_art_abs(json_file):
   return article, abstract
 
 
-def write_to_bin(tokenized_dir, out_path, makevocab=False):
+def write_to_bin(tokenized_dir, out_file, makevocab=False):
   """Reads the tokenized .story files corresponding to the urls listed in the url_file and writes them to a out_file."""
   print "Making bin file for files listed in %s..." % tokenized_dir
   # url_list = read_text_file(url_file)
