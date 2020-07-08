@@ -229,8 +229,8 @@ if __name__ == '__main__':
   
 
   # Create some new directories
-  if not os.path.exists(train_tokenized_stories_dir): os.makedirs(train_tokenized_stories_dir)
-  if not os.path.exists(dev_tokenized_stories_dir): os.makedirs(dev_tokenized_stories_dir)
+  if not os.path.exists(train_tokenized_dir): os.makedirs(train_tokenized_dir)
+  if not os.path.exists(dev_tokenized_dir): os.makedirs(dev_tokenized_dir)
   if not os.path.exists(finished_files_dir): os.makedirs(finished_files_dir)
 
   # Run stanford tokenizer on both stories dirs, outputting to tokenized stories directories
