@@ -162,7 +162,7 @@ def write_to_bin(tokenized_dir, out_file, makevocab=False):
   # story_fnames = [s+".story" for s in url_hashes]
   # num_stories = len(story_fnames)
   story_fnames = os.listdir(tokenized_dir)
-
+  num_stories = len(story_fnames)
 
 
   if makevocab:
