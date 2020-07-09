@@ -169,18 +169,15 @@ def write_to_bin(tokenized_dir, out_file, makevocab=False):
     vocab_counter = collections.Counter()
 
   with open(out_file, 'wb') as writer:
-    for idx,s in enumerate(story_fnames):
+    for idx in range(num_stories):
       if idx % 1000 == 0:
-        print "Writing story %i of %i; %.2f percent done" % (idx, num_stories/2, 2*float(idx)*100.0/float(num_stories))
+        print "Writing story %i of %i; %.2f percent done" % (idx, num_stories, float(idx)*100.0/float(num_stories))
 
       # Look in the tokenized story dirs to find the .story file corresponding to this url
-      if os.path.isfile(os.path.join(tokenized_dir, s)):
-        src_file = os.path.join(tokenized_dir, "%s.src"%idx)
-        tgt_file = os.path.join(tokenized_dir, "%s.tgt"%idx)
+      
+      src_file = os.path.join(tokenized_dir, "%s.src"%idx)
+      tgt_file = os.path.join(tokenized_dir, "%s.tgt"%idx)
      
-      else:
-        print "Error: Couldn't find tokenized story file %s in tokenized story directories %s. Was there an error during tokenization?" % (s, tokenized_dir)
-        # Check again if tokenized stories directories contain correct number of files
       # Get the strings to write to .bin file
       article, abstract = get_art_abs(src_file, tgt_file)
 
