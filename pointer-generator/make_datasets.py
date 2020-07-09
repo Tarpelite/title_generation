@@ -120,9 +120,9 @@ def get_art_abs(src_file, tgt_file):
   text = io.open(src_file, "r", encoding="utf-8").read()
   title = io.open(tgt_file, "r", encoding="utf-8").read()
   text = text.encode("utf-8")
-  print(text)
+  # print(text)
   title = title.encode("utf-8")
-  print(title)
+  # print(title)
   title = "%s %s %s" %(SENTENCE_START, title, SENTENCE_END)
   return text ,title
   # lines = read_text_file(story_file)
