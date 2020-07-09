@@ -8,7 +8,7 @@ import collections
 import tensorflow as tf
 from tensorflow.core.example import example_pb2
 import json
-
+import io
 dm_single_close_quote = u'\u2019' # unicode
 dm_double_close_quote = u'\u201d'
 END_TOKENS = ['.', '!', '?', '...', "'", "`", '"', dm_single_close_quote, dm_double_close_quote, ")"] # acceptable ways to end a sentence
@@ -117,8 +117,9 @@ def fix_missing_period(line):
 
 
 def get_art_abs(json_file):
-  with open(json_file, "r") as f:
-    line = json.loads(f.read().decode("utf-8").strip())
+  with io.open(json_file, "r", encoding="utf-8") as f:
+    
+    line = json.loads(f.read().strip())
   text = line["src"]
   title = line["tgt"]
   title = "%s %s %s" %(SENTENCE_START, title, SENTENCE_END)
