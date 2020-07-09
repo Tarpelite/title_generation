@@ -119,6 +119,8 @@ def fix_missing_period(line):
 def get_art_abs(src_file, tgt_file):
   text = io.open(src_file, "r", encoding="utf-8").read().decode("utf-8")
   title = io.open(tgt_file, "r", encoding="utf-8").read().decode("utf-8")
+  print(title)
+  print(text)
   title = "%s %s %s" %(SENTENCE_START, title, SENTENCE_END)
   return text ,title
   # lines = read_text_file(story_file)
