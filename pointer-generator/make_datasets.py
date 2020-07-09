@@ -116,13 +116,9 @@ def fix_missing_period(line):
   return line + " ."
 
 
-def get_art_abs(json_file):
-  with io.open(json_file, "r", encoding="utf-8") as f:
-    line = f.read().strip()
-    print(line)
-    line = json.loads(f.read().strip())
-  text = line["src"]
-  title = line["tgt"]
+def get_art_abs(src_file, tgt_file):
+  text = io.open(src_file, "r", encoding="utf-8").read()
+  title = io.open(tgt_file, "r", encoding="utf-8").read()
   title = "%s %s %s" %(SENTENCE_START, title, SENTENCE_END)
   return text ,title
   # lines = read_text_file(story_file)
@@ -151,9 +147,9 @@ def get_art_abs(json_file):
   # article = ' '.join(article_lines)
 
   # Make abstract into a signle string, putting <s> and </s> tags around the sentences
-  abstract = ' '.join(["%s %s %s" % (SENTENCE_START, sent, SENTENCE_END) for sent in highlights])
 
-  return article, abstract
+
+  return text, title
 
 
 def write_to_bin(tokenized_dir, out_file, makevocab=False):
@@ -164,7 +160,7 @@ def write_to_bin(tokenized_dir, out_file, makevocab=False):
   # story_fnames = [s+".story" for s in url_hashes]
   # num_stories = len(story_fnames)
   story_fnames = os.listdir(tokenized_dir)
-  num_stories = len(story_fnames)
+  num_stories = len(story_fnames) / 2
 
 
   if makevocab:
@@ -173,17 +169,18 @@ def write_to_bin(tokenized_dir, out_file, makevocab=False):
   with open(out_file, 'wb') as writer:
     for idx,s in enumerate(story_fnames):
       if idx % 1000 == 0:
-        print "Writing story %i of %i; %.2f percent done" % (idx, num_stories, float(idx)*100.0/float(num_stories))
+        print "Writing story %i of %i; %.2f percent done" % (idx, num_stories/2, 2*float(idx)*100.0/float(num_stories))
 
       # Look in the tokenized story dirs to find the .story file corresponding to this url
       if os.path.isfile(os.path.join(tokenized_dir, s)):
-        story_file = os.path.join(tokenized_dir, s)
+        src_file = os.path.join(tokenized_dir, "%s.src"%idx)
+        tgt_file = os.path.join(tokenized_dir, "%s.tgt"%idx)
      
       else:
         print "Error: Couldn't find tokenized story file %s in tokenized story directories %s. Was there an error during tokenization?" % (s, tokenized_dir)
         # Check again if tokenized stories directories contain correct number of files
       # Get the strings to write to .bin file
-      article, abstract = get_art_abs(story_file)
+      article, abstract = get_art_abs(src_file, tgt_file)
 
       # Write to tf.Example
       tf_example = example_pb2.Example()
