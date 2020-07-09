@@ -117,8 +117,8 @@ def fix_missing_period(line):
 
 
 def get_art_abs(json_file):
-  with open(json_file, "r", encoding="utf-8") as f:
-    line = json.loads(f.read().strip())
+  with open(json_file, "r") as f:
+    line = json.loads(f.read().decode("utf-8").strip())
   text = line["src"]
   title = line["tgt"]
   title = "%s %s %s" %(SENTENCE_START, title, SENTENCE_END)
