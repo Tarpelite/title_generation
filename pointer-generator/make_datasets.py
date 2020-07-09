@@ -184,8 +184,8 @@ def write_to_bin(tokenized_dir, out_file, makevocab=False):
 
       # Write to tf.Example
       tf_example = example_pb2.Example()
-      tf_example.features.feature['article'].bytes_list.value.extend([article])
-      tf_example.features.feature['abstract'].bytes_list.value.extend([abstract])
+      tf_example.features.feature['article'].bytes_list.value.extend([article.encode()])
+      tf_example.features.feature['abstract'].bytes_list.value.extend([abstract.encode()])
       tf_example_str = tf_example.SerializeToString()
       str_len = len(tf_example_str)
       writer.write(struct.pack('q', str_len))
