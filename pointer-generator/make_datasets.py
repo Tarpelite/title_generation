@@ -156,7 +156,7 @@ def get_art_abs(src_file, tgt_file):
   return text, title
 
 
-def write_to_bin(tokenized_dir, out_file, makevocab=False):
+def write_to_bin(tokenized_dir, out_file, label, makevocab=False):
   """Reads the tokenized .story files corresponding to the urls listed in the url_file and writes them to a out_file."""
   print "Making bin file for files listed in %s..." % tokenized_dir
   # url_list = read_text_file(url_file)
@@ -187,6 +187,7 @@ def write_to_bin(tokenized_dir, out_file, makevocab=False):
       tf_example = example_pb2.Example()
       tf_example.features.feature['article'].bytes_list.value.extend([article])
       tf_example.features.feature['abstract'].bytes_list.value.extend([abstract])
+      tf_example.features.feature['label'].bytes_list.value.extend([label])
       tf_example_str = tf_example.SerializeToString()
       str_len = len(tf_example_str)
       writer.write(struct.pack('q', str_len))
@@ -225,9 +226,9 @@ if __name__ == '__main__':
     sys.exit()
   train_dir = sys.argv[1]
   dev_dir = sys.argv[2]
+  label = sys.argv[3]
 
   
-
   # Create some new directories
   if not os.path.exists(train_tokenized_dir): os.makedirs(train_tokenized_dir)
   if not os.path.exists(dev_tokenized_dir): os.makedirs(dev_tokenized_dir)
@@ -239,8 +240,8 @@ if __name__ == '__main__':
 
   # Read the tokenized stories, do a little postprocessing then write to bin files
   
-  write_to_bin(dev_tokenized_dir, os.path.join(finished_files_dir, "val.bin"))
-  write_to_bin(train_tokenized_dir, os.path.join(finished_files_dir, "train.bin"), makevocab=True)
+  write_to_bin(dev_tokenized_dir, os.path.join(finished_files_dir, "val.bin"), label)
+  write_to_bin(train_tokenized_dir, os.path.join(finished_files_dir, "train.bin"), label, makevocab=True)
 
   # Chunk the data. This splits each of train.bin, val.bin and test.bin into smaller chunks, each containing e.g. 1000 examples, and saves them in finished_files/chunks
   # chunk_all()
