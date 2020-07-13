@@ -27,7 +27,7 @@ from .training_args import TrainingArguments, is_torch_tpu_available
 
 
 try:
-    from apex import amp
+    from apex import amp  
 
     _has_apex = True
 except ImportError:
@@ -463,9 +463,9 @@ class Trainer:
                 parallel_loader = pl.ParallelLoader(train_dataloader, [self.args.device]).per_device_loader(
                     self.args.device
                 )
-                epoch_iterator = tqdm(parallel_loader, desc="Iteration", disable=not self.is_local_master())
+                epoch_iterator = tqdm(parallel_loader, desc="Iter (loss=X.XXX)", disable=not self.is_local_master())
             else:
-                epoch_iterator = tqdm(train_dataloader, desc="Iteration", disable=not self.is_local_master())
+                epoch_iterator = tqdm(train_dataloader, desc="Iter (loss=X.XXX)", disable=not self.is_local_master())
 
             for step, inputs in enumerate(epoch_iterator):
 
@@ -473,14 +473,15 @@ class Trainer:
                 if steps_trained_in_current_epoch > 0:
                     steps_trained_in_current_epoch -= 1
                     continue
-
-                tr_loss += self._training_step(model, inputs, optimizer)
+                loss = self._training_step(model, inputs, optimizer)
+                tr_loss += loss
 
                 if (step + 1) % self.args.gradient_accumulation_steps == 0 or (
                     # last step in epoch but step is always smaller than gradient_accumulation_steps
                     len(epoch_iterator) <= self.args.gradient_accumulation_steps
                     and (step + 1) == len(epoch_iterator)
                 ):
+                    epoch_iterator.set_description("Iter (loss=%5.3f)"%loss.item())
                     if self.args.fp16:
                         torch.nn.utils.clip_grad_norm_(amp.master_params(optimizer), self.args.max_grad_norm)
                     else:
