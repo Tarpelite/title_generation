@@ -258,12 +258,12 @@ class DataCollatorForDistillLM(DataCollator):
 
             # convert to sequence labelling 
             print(selected_instance.shape)
-            sl_labels = torch.full(selected_instance.shape, 0).detach().cpu().numpy().tolist()
+            sl_labels = []
             for i in selected_labels:
                 if i == -100:
-                    sl_labels[i] = 0
+                    sl_labels.append(0)
                 else:
-                    sl_labels[i] = 1
+                    sl_labels.append(1)
             
             all_inputs.append(instance["input_ids"])
             all_attention_mask.append(instance["attention_mask"])
