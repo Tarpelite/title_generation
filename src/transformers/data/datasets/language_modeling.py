@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 class MaskSelector:
-    model: PreTrainedModel
+    model: PreTrainedModel       
 
     def __init__(
         self,
@@ -92,14 +92,6 @@ class MaskGenerator:
         # 0 for unchanged token, 1 for masking token
         preds = torch.argmax(logits, dim=-1)
         return preds.detach()
-
-
-        
-
-
-
-
-
 
         
 
