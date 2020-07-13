@@ -31,6 +31,7 @@ class DataCollator(ABC):
 InputDataClass = NewType("InputDataClass", Any)
 
 
+
 @dataclass
 class DefaultDataCollator(DataCollator):
     """
@@ -222,6 +223,59 @@ class DataCollatorForWeightedLanguageModeling(DataCollator):
 
         # The rest of the time (10% of the time) we keep the masked input tokens unchanged
         return inputs, labels
+
+@dataclass
+class DataCollatorForDistillLM(DataCollator):
+    tokenizer: PreTrainedTokenizer
+    selector : MaskSelector
+    mlm_sample_times: int = 16
+    mlm: bool = True
+    mlm_probability: float = 0.15
+
+    def collate_batch(self, examples: List) -> Dict[str, torch.Tensor]:
+        all_inputs = []
+        all_attention_mask = []
+        all_token_type_ids = []
+        all_labels = []
+        for instance in examples:
+            batch = {}
+            for k,v in vars(instance).items():
+                 batch[k] = torch.tensor([getattr(instance, k) for _ in range(self.mlm_sample_times)], dtype=torch.long)
+
+            inputs, labels = self.mask_tokens(batch["input_ids"])
+            selector_input = {   
+                "input_ids":inputs,
+                "attention_mask":batch["attention_mask"],
+                "token_type_ids":batch["token_type_ids"],
+            }
+
+            out = self.selector.predict(selector_input)
+            selected_instance = inputs[out] #[seq_len]
+
+            # show examples
+            selected_inputs = selected_instance.detach().cpu().numpy()
+            selected_labels = labels[out].detach().cpu().numpy()
+
+            # convert to sequence labelling 
+            sl_labels = torch.full(selected_instance.shape, 0).detach().cpu().numpy().tolist()
+            for i in selected_labels:
+                if i == -100:
+                    sl_labels[i] = 0
+                else:
+                    sl_labels[i] = 1
+            
+            all_inputs.append(instance["input_ids"])
+            all_attention_mask.append(instance["attention_mask"])
+            all_token_type_ids.append(instance["token_type_ids"])
+            all_labels.append(sl_labels)
+            
+
+        return {
+            "input_ids":torch.tensor(all_inputs), dtype=torch.long),
+            "attention_mask":torch.tensor(all_attention_mask, dtype=torch.long),
+            "token_type_ids":torch.tensor(all_token_type_ids, dtype=torch.long),
+            "labels": torch.tensor(all_labels, dtype=torch.long)
+        }
 
 @dataclass
 class DataCollatorForSelectLM(DataCollator):

@@ -13,6 +13,7 @@ from ...modeling_utils import PreTrainedModel
 from ...training_args import TrainingArguments
 from .glue import glue_convert_examples_to_features
 from ..processors.utils import InputExample,InputFeatures
+from ...optimization import AdamW, get_linear_schedule_with_warmup
 import random
 import json
 import copy
@@ -61,7 +62,45 @@ class MaskSelector:
         # print("max_logits:{} min_logits:{}".format(max(preds), min(preds)))
         return np.argmax(preds)
 
+
+class MaskGenerator:
+    model: PreTrainedModel
+
+    def __init__(
+        self,
+        model: PreTrainedModel,
+        args: TrainingArguments):
+
+        self.model = model.to(args.device)
+        self.args = args
+    
+    def predict(self,
+        batch):
+        model = self.model
+        if self.args.n_gpu > 1:
+            model = torch.nn.DataParallel(model)
+        else:
+            model = self.model
+        model.eval()
+        for k,v in batch.items():
+            batch[k] = v.to(self.args.device)
+
+        with torch.no_grad():
+            outputs = model(**mask_batch)
+            logits = outputs[0] #[batch_size, seq_len, hidden_size]
         
+        # 0 for unchanged token, 1 for masking token
+        preds = torch.argmax(logits, dim=-1)
+        return preds.detach()
+
+
+        
+
+
+
+
+
+
         
 
 
