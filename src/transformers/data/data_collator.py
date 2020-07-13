@@ -257,14 +257,14 @@ class DataCollatorForDistillLM(DataCollator):
             selected_labels = labels[out].detach().cpu().numpy()
 
             # convert to sequence labelling 
-            print(selected_instance.shape)
+            # print(selected_instance.shape)
             sl_labels = []
             for i in selected_labels:
                 if i == -100:
                     sl_labels.append(0)
                 else:
                     sl_labels.append(1)
-            print(sl_labels)
+            # print(sl_labels)
             all_inputs.append(instance.input_ids)
             all_attention_mask.append(instance.attention_mask)
             all_token_type_ids.append(instance.token_type_ids)
