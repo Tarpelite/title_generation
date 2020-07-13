@@ -271,11 +271,12 @@ class DataCollatorForDistillLM(DataCollator):
             
 
         return {
-            "input_ids":torch.tensor(all_inputs), dtype=torch.long),
+            "input_ids":torch.tensor(all_inputs, dtype=torch.long),
             "attention_mask":torch.tensor(all_attention_mask, dtype=torch.long),
             "token_type_ids":torch.tensor(all_token_type_ids, dtype=torch.long),
             "labels": torch.tensor(all_labels, dtype=torch.long)
         }
+        
 
 @dataclass
 class DataCollatorForSelectLM(DataCollator):
