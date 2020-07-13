@@ -274,7 +274,7 @@ def main():
 
     data_collator = DataCollatorForLMDistill(
         tokenizer = tokenizer, mlm=data_args.mlm,
-        mlm_probability=data_args.mlm_probability.
+        mlm_probability=data_args.mlm_probability,
         mlm_sample_times=16,
         selector = mask_selector
     )
