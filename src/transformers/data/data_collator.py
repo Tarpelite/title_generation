@@ -257,6 +257,7 @@ class DataCollatorForDistillLM(DataCollator):
             selected_labels = labels[out].detach().cpu().numpy()
 
             # convert to sequence labelling 
+            print(selected_instance.shape)
             sl_labels = torch.full(selected_instance.shape, 0).detach().cpu().numpy().tolist()
             for i in selected_labels:
                 if i == -100:
