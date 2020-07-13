@@ -264,10 +264,10 @@ class DataCollatorForDistillLM(DataCollator):
                     sl_labels.append(0)
                 else:
                     sl_labels.append(1)
-            
-            all_inputs.append(instance["input_ids"])
-            all_attention_mask.append(instance["attention_mask"])
-            all_token_type_ids.append(instance["token_type_ids"])
+            print(s1_labels)
+            all_inputs.append(instance.input_ids)
+            all_attention_mask.append(instance.attention_mask)
+            all_token_type_ids.append(instance.token_type_ids)
             all_labels.append(sl_labels)
             
 
