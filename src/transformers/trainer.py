@@ -481,7 +481,7 @@ class Trainer:
                     len(epoch_iterator) <= self.args.gradient_accumulation_steps
                     and (step + 1) == len(epoch_iterator)
                 ):
-                    epoch_iterator.set_description("Iter (loss=%5.3f)"%loss.item())
+                    epoch_iterator.set_description("Iter (loss=%5.3f)"%loss)
                     if self.args.fp16:
                         torch.nn.utils.clip_grad_norm_(amp.master_params(optimizer), self.args.max_grad_norm)
                     else:
