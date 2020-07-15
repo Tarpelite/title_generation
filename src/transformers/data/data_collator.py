@@ -261,7 +261,7 @@ class DataCollatorForMaskGen(DataCollator):
 
         all_input_ids[indices_replaced] = self.tokenizer.convert_tokens_to_ids(self.tokenizer.mask_token)
 
-        indices_random = torch.bernouli(torch.full(all_labels.shape, 0.5)).bool() & masked_indices & ~indices_replaced
+        indices_random = torch.bernoulli(torch.full(all_labels.shape, 0.5)).bool() & masked_indices & ~indices_replaced
 
         random_words = torch.randint(len(self.tokenizer), all_labels.shape, dtype=torch.long)
 
