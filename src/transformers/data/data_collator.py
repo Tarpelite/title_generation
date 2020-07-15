@@ -243,14 +243,15 @@ class DataCollatorForMaskGen(DataCollator):
         }
 
         out = self.generator.predict(generator_input) # out shape same as input_ids
+        print(out)
         all_labels = all_input_ids.clone()
         special_tokens_mask = [
             self.tokenizer.get_special_tokens_mask(val, already_has_special_tokens=True) for val in all_labels.tolist()
         ]
-        out.masked_fill(torch.tensor(special_tokens_mask, dtype=torch.bool), value=)
+        out.masked_fill(torch.tensor(special_tokens_mask, dtype=torch.bool), value=0)
         if self.tokenizer._pad_token is not None:
             padding_mask = all_labels.eq(self.tokenizer.pad_token_id)
-            out.masked_fill(padding_mask, value=0.0)
+            out.masked_fill(padding_mask, value=0)
         
         masked_indices = torch.bernoulli(out).bool()
         all_labels[~masked_indices] = -100
