@@ -31,11 +31,12 @@ from transformers import (
     MODEL_WITH_LM_HEAD_MAPPING,
     AutoConfig,
     AutoModelWithLMHead,
-    AutoModelForSequenceClassification,
+    AutoModelForTokenClassification,
     AutoTokenizer,
     DataCollatorForLanguageModeling,
     DataCollatorForWeightedLanguageModeling,
     DataCollatorForSelectLM,
+    DataCollatorForMaskGen,
     HfArgumentParser,
     LineByLineTextDataset,
     FullyLineByLineTextDataset,
@@ -83,8 +84,7 @@ class ModelArguments:
     cache_dir: Optional[str] = field(
         default=None, metadata={"help": "Where do you want to store the pretrained models downloaded from s3"}
     )
-
-    cls_model_name_or_path: Optional[str] = field(
+    gen_model_name_or_path: Optional[str] = field(
         default=None,
         metadata={
             "help": "The model checkpoint for weights initialization. Leave None if you want to train a model from scratch."
@@ -231,21 +231,21 @@ def main():
         logger.info("Training new model from scratch")
         model = AutoModelWithLMHead.from_config(config)
     
-    if model_args.cls_model_name_or_path:
-        cls_config = AutoConfig.from_pretrained(
-            model_args.cls_model_name_or_path,
+    if model_args.gen_model_name_or_path:
+        gen_config = AutoConfig.from_pretrained(
+            model_args.gen_model_name_or_path,
             num_labels=2,
             finetuning_task="cola",
             cache_dir=model_args.cache_dir,
         )
-        cls_model = AutoModelForSequenceClassification.from_pretrained(
-            model_args.cls_model_name_or_path,
+        gen_model = AutoModelForTokenClassification.from_pretrained(
+            model_args.gen_model_name_or_path,
             from_tf=bool(".ckpt" in model_args.cls_model_name_or_path),
             config=cls_config,
             cache_dir=model_args.cache_dir,
         )
-        cls_model.resize_token_embeddings(len(tokenizer))
-        mask_selector = MaskSelector(cls_model,training_args)
+        gen_model.resize_token_embeddings(len(tokenizer))
+        mask_generator = MaskGenerator(gen_model,training_args)
 
     model.resize_token_embeddings(len(tokenizer))
     
@@ -267,25 +267,10 @@ def main():
     train_dataset = get_dataset(data_args, tokenizer=tokenizer, model_args=model_args) if training_args.do_train else None
     eval_dataset = get_dataset(data_args, model_args=None, tokenizer=tokenizer, evaluate=True) if training_args.do_eval else None
 
-    if len(data_args.weighted_vocab) > 0:
-        weighted_vocab = []
-        with open(data_args.weighted_vocab, "r", encoding="utf-8") as f:
-            for line in tqdm(f.readlines()):
-                line = float(line.strip())
-                weighted_vocab.append(line)
-        assert len(weighted_vocab) == len(tokenizer.vocab)
-
-        data_collator = DataCollatorForWeightedLanguageModeling(
-            tokenizer = tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability, weighted_vocab=weighted_vocab
-        )
-    elif data_args.mlm_sample_times > 1:
-        data_collator = DataCollatorForSelectLM(
-            tokenizer = tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability, mlm_sample_times=data_args.mlm_sample_times, selector = mask_selector
-        )
-    else:
-        data_collator = DataCollatorForLanguageModeling(
-            tokenizer=tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability
-        )
+    
+    data_collator = 
+        tokenizer=tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability
+    )
     
 
     # Initialize our Trainer
