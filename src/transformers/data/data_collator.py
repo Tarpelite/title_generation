@@ -257,7 +257,7 @@ class DataCollatorForMaskGen(DataCollator):
         masked_indices = torch.bernoulli(out).bool()
         all_labels[~masked_indices] = -100
 
-        indices_replaced = torch.bernoulli(torch.full(out, 0.8)).bool() & masked_indices
+        indices_replaced = torch.bernoulli(torch.full(out.shape, 0.8)).bool() & masked_indices
 
         all_input_ids[indices_replaced] = self.tokenizer.convert_tokens_to_ids(self.tokenizer.mask_token)
 
