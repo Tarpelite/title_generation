@@ -240,8 +240,8 @@ def main():
         )
         gen_model = AutoModelForTokenClassification.from_pretrained(
             model_args.gen_model_name_or_path,
-            from_tf=bool(".ckpt" in model_args.cls_model_name_or_path),
-            config=cls_config,
+            from_tf=bool(".ckpt" in model_args.gen_model_name_or_path),
+            config=gen_config,
             cache_dir=model_args.cache_dir,
         )
         gen_model.resize_token_embeddings(len(tokenizer))
