@@ -268,8 +268,8 @@ def main():
     eval_dataset = get_dataset(data_args, model_args=None, tokenizer=tokenizer, evaluate=True) if training_args.do_eval else None
 
     
-    data_collator = 
-        tokenizer=tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability
+    data_collator = DataCollatorForMaskGen(
+        tokenizer=tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability, generator=mask_generator
     )
     
 
