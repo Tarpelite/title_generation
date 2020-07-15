@@ -247,6 +247,7 @@ class DataCollatorForMaskGen(DataCollator):
         special_tokens_mask = [
             self.tokenizer.get_special_tokens_mask(val, already_has_special_tokens=True) for val in all_labels.tolist()
         ]
+        out.masked_fill(torch.tensor(special_tokens_mask, dtype=torch.bool), value=)
         if self.tokenizer._pad_token is not None:
             padding_mask = all_labels.eq(self.tokenizer.pad_token_id)
             out.masked_fill(padding_mask, value=0.0)
