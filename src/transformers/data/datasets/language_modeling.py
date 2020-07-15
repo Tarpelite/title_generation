@@ -86,11 +86,12 @@ class MaskGenerator:
             batch[k] = v.to(self.args.device)
 
         with torch.no_grad():
-            outputs = model(**mask_batch)
+            outputs = model(**batch)
             logits = outputs[0] #[batch_size, seq_len, hidden_size]
         
         # 0 for unchanged token, 1 for masking token
         preds = torch.argmax(logits, dim=-1)
+        
         return preds.detach()
 
         

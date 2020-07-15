@@ -355,7 +355,7 @@ if is_torch_available():
 
     # Trainer
     from .trainer import Trainer, set_seed, torch_distributed_zero_first, EvalPrediction
-    from .data.data_collator import DefaultDataCollator, DataCollator, DataCollatorForLanguageModeling, DataCollatorForWeightedLanguageModeling, DataCollatorForSelectLM, DataCollatorForDistillLM
+    from .data.data_collator import DefaultDataCollator, DataCollator, DataCollatorForLanguageModeling, DataCollatorForWeightedLanguageModeling, DataCollatorForSelectLM, DataCollatorForDistillLM, DataCollatorForMaskGen
     
     from .data.datasets import GlueDataset, TextDataset, LineByLineTextDataset, GlueDataTrainingArguments,FullyLineByLineTextDataset, MaskSelector
 
