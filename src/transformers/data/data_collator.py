@@ -231,7 +231,7 @@ class DataCollatorForMaskGen(DataCollator):
     mlm: bool = True
     mlm_probability: float = 0.15
 
-    def collate_batch(self, examples:List) -> Dist[str, torch.Tensor]:
+    def collate_batch(self, examples:List) -> Dict[str, torch.Tensor]:
         all_input_ids = torch.tensor([instance.input_ids for instance in examples], dtype=torch.long)
         all_attention_mask = torch.tensor([instance.attention_mask for instance in examples], dtype=torch.long)
         all_token_type_ids = torch.tensor([instance.token_type_ids for instance in examples], dtype=torch.long)
@@ -268,10 +268,6 @@ class DataCollatorForMaskGen(DataCollator):
             "input_ids":all_input_ids,
             "labels":all_labels
         }
-
-
-
-
 
 
 
