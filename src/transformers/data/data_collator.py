@@ -232,7 +232,7 @@ class DataCollatorForMaskGen(DataCollator):
     mlm_probability: float = 0.15
 
     def collate_batch(self, examples:List) -> Dict[str, torch.Tensor]:
-        
+
         all_input_ids = torch.tensor([instance.input_ids for instance in examples], dtype=torch.long)
         all_attention_mask = torch.tensor([instance.attention_mask for instance in examples], dtype=torch.long)
         all_token_type_ids = torch.tensor([instance.token_type_ids for instance in examples], dtype=torch.long)
@@ -243,16 +243,16 @@ class DataCollatorForMaskGen(DataCollator):
             "token_type_ids": all_token_type_ids
         }
 
-        out = self.generator.predict(generator_input) # out shape same as input_ids
+        out = self.generator.predict(generator_input).float() # out shape same as input_ids
         print(out)
         all_labels = all_input_ids.clone()
         special_tokens_mask = [
             self.tokenizer.get_special_tokens_mask(val, already_has_special_tokens=True) for val in all_labels.tolist()
         ]
-        out.masked_fill(torch.tensor(special_tokens_mask, dtype=torch.bool), value=0)
+        out.masked_fill(torch.tensor(special_tokens_mask, dtype=torch.bool), value=0.0)
         if self.tokenizer._pad_token is not None:
             padding_mask = all_labels.eq(self.tokenizer.pad_token_id)
-            out.masked_fill(padding_mask, value=0)
+            out.masked_fill(padding_mask, value=0.0)
         
         masked_indices = torch.bernoulli(out).bool()
         all_labels[~masked_indices] = -100
@@ -327,6 +327,7 @@ class DataCollatorForDistillLM(DataCollator):
             "token_type_ids":torch.tensor(all_token_type_ids, dtype=torch.long),
             "labels": torch.tensor(all_labels, dtype=torch.long)
         }
+
     def mask_tokens(self, inputs: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Prepare masked tokens inputs/labels for masked language modeling: 80% MASK, 10% random, 10% original.
