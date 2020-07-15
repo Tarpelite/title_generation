@@ -91,8 +91,9 @@ class MaskGenerator:
         
         # 0 for unchanged token, 1 for masking token
         preds = torch.argmax(logits, dim=-1)
-        
-        return preds.detach()
+        print(torch.sum(preds))
+
+        return preds.detach().cpu()
 
         
 
