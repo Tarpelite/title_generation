@@ -312,7 +312,7 @@ class DataCollatorForDistillLM(DataCollator):
             sl_labels = []
             mask_token_id = self.tokenizer.convert_tokens_to_ids(self.tokenizer.mask_token)
             print(mask_token_id)
-            for i in selected_labels:
+            for i in selected_inputs:
                 if i == mask_token_id:
                     sl_labels.append(1)
                 else:
