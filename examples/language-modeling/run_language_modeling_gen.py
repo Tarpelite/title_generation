@@ -233,7 +233,8 @@ def main():
         gen_config = AutoConfig.from_pretrained(
             model_args.gen_model_name_or_path,
             num_labels=2,
-            finetuning_task="cola",
+            id2label = {0:"0", 1:"1"},
+            label2id={"0":0, "1":1  },
             cache_dir=model_args.cache_dir,
         )
         gen_model = AutoModelForTokenClassification.from_pretrained(
