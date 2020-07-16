@@ -293,6 +293,7 @@ class DataCollatorForDistillLM(DataCollator):
                  batch[k] = torch.tensor([getattr(instance, k) for _ in range(self.mlm_sample_times)], dtype=torch.long)
 
             inputs, labels = self.mask_tokens(batch["input_ids"])
+
             selector_input = {   
                 "input_ids":inputs,
                 "attention_mask":batch["attention_mask"],
@@ -309,18 +310,22 @@ class DataCollatorForDistillLM(DataCollator):
             # convert to sequence labelling 
             # print(selected_instance.shape)
             sl_labels = []
+            mask_token_id = self.tokenizer.convert_tokens_to_ids
+
             for i in selected_labels:
-                if i == -100:
-                    sl_labels.append(0)
-                else:
+                if i == mask_token_id:
                     sl_labels.append(1)
+                else:
+                    sl_labels.append(0)
             # print(sl_labels)
-            all_inputs.append(instance.input_ids)
+            all_inputs.append(selected_instance)
             all_attention_mask.append(instance.attention_mask)
             all_token_type_ids.append(instance.token_type_ids)
             all_labels.append(sl_labels)
-            
 
+            print(selected_instance)
+            print(s1_labels)
+            
         return {
             "input_ids":torch.tensor(all_inputs, dtype=torch.long),
             "attention_mask":torch.tensor(all_attention_mask, dtype=torch.long),
