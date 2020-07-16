@@ -324,8 +324,8 @@ class DataCollatorForDistillLM(DataCollator):
             all_labels.append(sl_labels)
 
             print(selected_instance)
-            print(s1_labels)
-            
+            print(sl_labels)
+
         return {
             "input_ids":torch.tensor(all_inputs, dtype=torch.long),
             "attention_mask":torch.tensor(all_attention_mask, dtype=torch.long),
