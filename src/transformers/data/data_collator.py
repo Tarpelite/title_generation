@@ -320,7 +320,7 @@ class DataCollatorForDistillLM(DataCollator):
             # print(sl_labels)
             # print("selected labels:")
             # print(selected_labels)
-            all_inputs.append(selected_inputs)
+            all_inputs.append(batch["input_ids"])
             all_attention_mask.append(instance.attention_mask)
             all_token_type_ids.append(instance.token_type_ids)
             all_labels.append(sl_labels)
