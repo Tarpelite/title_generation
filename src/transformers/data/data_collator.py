@@ -310,7 +310,7 @@ class DataCollatorForDistillLM(DataCollator):
             # convert to sequence labelling 
             # print(selected_instance.shape)
             sl_labels = []
-            mask_token_id = self.tokenizer.convert_tokens_to_ids
+            mask_token_id = self.tokenizer.convert_tokens_to_ids(self.tokenizer.mask_token)
             print(mask_token_id)
             for i in selected_labels:
                 if i == mask_token_id:
