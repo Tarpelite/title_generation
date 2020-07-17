@@ -590,6 +590,13 @@ class Trainer:
 
         outputs = model(**inputs)
         loss = outputs[0]  # model outputs are always tuple in transformers (see doc)
+        logits = outputs[1]
+
+        preds = torch.argmax(logits, dim=-1)
+        print("labels:")
+        print(inputs["labels"])
+        print("preds:")
+        print(preds)
 
         if self.args.n_gpu > 1:
             loss = loss.mean()  # mean() to average on multi-gpu parallel training
