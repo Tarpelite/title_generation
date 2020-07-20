@@ -146,7 +146,7 @@ class DataTrainingArguments:
         default="", metadata={"help": "weighted vocab for target language masking"}
     )
 
-    train_data_cache_path: str = filed(
+    train_data_cache_path: str = field(
         default="", metadata= {"help":"train data file cache for train gen"}
     )
 
