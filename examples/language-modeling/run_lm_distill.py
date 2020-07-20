@@ -314,7 +314,15 @@ def main():
             all_input_ids.append(input_ids)
             all_labels.append(labels)
         
-        with open("")
+        all_input_ids = torch.stack(all_input_ids, dim=0)
+        all_labels = torch.stack(all_labels, dim=0)
+
+        assert len(all_input_ids) == len(all_labels)
+
+        cache_data = {
+            "input_ids":all_input_ids,
+            "labels": all_labels
+        }
 
         exit()
 
