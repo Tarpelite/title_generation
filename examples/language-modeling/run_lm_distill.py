@@ -49,7 +49,7 @@ from transformers import (
     TrainingArguments,
     MaskSelector,
     set_seed,
-    SelectorCacheDataset
+    SelectCacheDataset
 )
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.distributed import DistributedSampler
@@ -162,7 +162,7 @@ class DataTrainingArguments:
 def get_dataset(args: DataTrainingArguments, tokenizer: PreTrainedTokenizer,model_args:ModelArguments, evaluate=False):
     file_path = args.eval_data_file if evaluate else args.train_data_file
     if len(args.train_data_cache_path)>0 and args.train_gen:
-        return SelectorCacheDataset(
+        return SelectCacheDataset(
             file_path=args.train_data_cache_path
         )
     elif args.line_by_line:
