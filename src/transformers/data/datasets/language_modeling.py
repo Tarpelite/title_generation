@@ -188,7 +188,6 @@ class SelectCacheDataset(Dataset):
         assert os.path.isfile(file_path)
 
         all_data = torch.load(file_path)
-        all_input_ids = all_data["input_ids"]
         self.examples = all_data
     
     def __len__(self):
@@ -196,10 +195,10 @@ class SelectCacheDataset(Dataset):
     
     def __getitem__(self, i):
         return {
-            "input_ids":self.examples[i]["input_ids"],
-            "labels":self.examples[i]["labels"]
+            "input_ids":self.examples["input_ids"][i],
+            "labels":self.examples["labels"][i]
         }
-        
+
 
 class FullyLineByLineTextDataset(Dataset):
 
