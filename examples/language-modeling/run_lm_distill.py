@@ -298,7 +298,7 @@ def main():
         data_collator = DataCollatorForSelectLM(
             tokenizer = tokenizer, mlm=data_args.mlm,
             mlm_probability=data_args.mlm_probability,
-            mlm_sample_times=16,
+            mlm_sample_times=data_args.mlm_sample_times,
             selector = mask_selector
         )
 
