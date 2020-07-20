@@ -52,6 +52,7 @@ from transformers import (
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 from torch.utils.data.sampler import RandomSampler, Sampler, SequentialSampler
+import torch
 
 # from pudb import set_trace
 # set_trace()
@@ -309,9 +310,7 @@ def main():
         all_labels = []
         epoch_iterator = tqdm(train_dataloader)
         
-        for step, inputs in epoch_iterator:
-            print(inputs)
-            break
+        for step, inputs in enumerate(epoch_iterator):
             input_ids = inputs["input_ids"]
             labels = inputs["labels"]
             all_input_ids.append(input_ids)
