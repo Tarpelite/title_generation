@@ -313,9 +313,12 @@ def main():
         for step, inputs in enumerate(epoch_iterator):
             input_ids = inputs["input_ids"]
             labels = inputs["labels"]
-            all_input_ids.append(input_ids)
-            all_labels.append(labels)
+            for ins in input_ids:
+                all_input_ids.append(ins)
+            for las in labels:
+                all_labels.append(labels)
         
+
         all_input_ids = torch.stack(all_input_ids, dim=0)
         all_labels = torch.stack(all_labels, dim=0)
 
