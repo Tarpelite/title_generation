@@ -39,6 +39,7 @@ from transformers import (
     DataCollatorForWeightedLanguageModeling,
     DataCollatorForSelectLM,
     DataCollatorForDistillLM,
+    DataCollatorForTrainGen,
     HfArgumentParser,
     LineByLineTextDataset,
     FullyLineByLineTextDataset,
@@ -48,6 +49,7 @@ from transformers import (
     TrainingArguments,
     MaskSelector,
     set_seed,
+    SelectorCacheDataset
 )
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.distributed import DistributedSampler
@@ -152,10 +154,18 @@ class DataTrainingArguments:
         default="", metadata= {"help":"train data file cache for train gen"}
     )
 
+    train_gen: bool = field(
+        default=False, metadata={"help": "Overwrite the cached training and evaluation sets"}
+    )
+
 
 def get_dataset(args: DataTrainingArguments, tokenizer: PreTrainedTokenizer,model_args:ModelArguments, evaluate=False):
     file_path = args.eval_data_file if evaluate else args.train_data_file
-    if args.line_by_line:
+    if len(args.train_data_cache_path)>0 and args.train_gen:
+        return SelectorCacheDataset(
+            file_path=args.train_data_cache_path
+        )
+    elif args.line_by_line:
         if args.mlm_sample_times > 1:
             return FullyLineByLineTextDataset(tokenizer=tokenizer, file_path=file_path, block_size=args.block_size, cache_dir=model_args.cache_dir)
         else:
@@ -284,7 +294,7 @@ def main():
     train_dataset = get_dataset(data_args, tokenizer=tokenizer, model_args=model_args) if training_args.do_train else None
     eval_dataset = get_dataset(data_args, model_args=None, tokenizer=tokenizer, evaluate=True) if training_args.do_eval else None
 
-    if len(data_args.train_data_cache_path) > 0:
+    if len(data_args.train_data_cache_path) > 0 and not data_args.train_gen:
         data_collator = DataCollatorForSelectLM(
             tokenizer = tokenizer, mlm=data_args.mlm,
             mlm_probability=data_args.mlm_probability,
@@ -332,11 +342,8 @@ def main():
         sys.exit(0)
 
     else:
-        data_collator = DataCollatorForDistillLM(
-            tokenizer = tokenizer, mlm=data_args.mlm,
-            mlm_probability=data_args.mlm_probability,
-            mlm_sample_times=16,
-            selector = mask_selector
+        data_collator = DataCollatorForTrainGen(
+            tokenizer = tokenizer
         )
 
         # Initialize our Trainer

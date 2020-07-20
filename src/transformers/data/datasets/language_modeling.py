@@ -183,7 +183,23 @@ class LineByLineTextDataset(Dataset):
     def __getitem__(self, i) -> torch.Tensor:
         return torch.tensor(self.examples[i], dtype=torch.long)
 
+class SelectCacheDataset(Dataset):
+    def __init__(self, file_path:str):
+        assert os.path.isfile(file_path)
 
+        all_data = torch.load(file_path)
+        all_input_ids = all_data["input_ids"]
+        self.examples = all_data
+    
+    def __len__(self):
+        return len(self.examples["input_ids"])
+    
+    def __getitem__(self, i):
+        return {
+            "input_ids":self.examples[i]["input_ids"],
+            "labels":self.examples[i]["labels"]
+        }
+        
 
 class FullyLineByLineTextDataset(Dataset):
 
