@@ -96,8 +96,6 @@ class MaskGenerator:
         return preds.detach().cpu()
 
         
-
-
 class TextDataset(Dataset):
     """
     This will be superseded by a framework-agnostic approach

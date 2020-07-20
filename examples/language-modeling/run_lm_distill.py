@@ -48,6 +48,10 @@ from transformers import (
     MaskSelector,
     set_seed,
 )
+from torch.utils.data.dataloader import DataLoader
+from torch.utils.data.distributed import DistributedSampler
+from torch.utils.data.sampler import RandomSampler, Sampler, SequentialSampler
+
 # from pudb import set_trace
 # set_trace()
 
@@ -133,11 +137,17 @@ class DataTrainingArguments:
             "Default to the model max input length for single sentence inputs (take into account special tokens)."
         },
     )
+
     overwrite_cache: bool = field(
         default=False, metadata={"help": "Overwrite the cached training and evaluation sets"}
     )
+
     weighted_vocab: str = field(
         default="", metadata={"help": "weighted vocab for target language masking"}
+    )
+
+    train_data_cache_path: str = filed(
+        default="", metadata= {"help":"train data file cache for train gen"}
     )
 
 
@@ -272,22 +282,58 @@ def main():
     train_dataset = get_dataset(data_args, tokenizer=tokenizer, model_args=model_args) if training_args.do_train else None
     eval_dataset = get_dataset(data_args, model_args=None, tokenizer=tokenizer, evaluate=True) if training_args.do_eval else None
 
-    data_collator = DataCollatorForDistillLM(
-        tokenizer = tokenizer, mlm=data_args.mlm,
-        mlm_probability=data_args.mlm_probability,
-        mlm_sample_times=16,
-        selector = mask_selector
-    )
+    if len(training_args.train_data_cache_path) > 0:
+        data_collator = DataCollatorForSelectLM(
+            tokenizer = tokenizer, mlm=data_args.mlm,
+            mlm_probability=data_args.mlm_probability,
+            mlm_sample_times=16,
+            selector = mask_selector
+        )
 
 
-    # Initialize our Trainer
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        data_collator=data_collator,
-        train_dataset=train_dataset,
-        eval_dataset=eval_dataset,
-    )
+        train_sampler = (
+                    RandomSampler(train_dataset)
+                    if training_args.local_rank == -1
+                    else DistributedSampler(train_dataset)
+                )
+
+        train_dataloader  = DataLoader(
+            train_dataset,
+            batch_size=16,
+            sampler = train_sampler,
+            collate_fn = data_collator.collate_batch,
+            drop_last = False,
+        )
+        all_input_ids = []
+        all_labels = []
+        epoch_iterator = tqdm(train_dataloader)
+        
+        for step, inputs in epoch_iterator:
+            input_ids = inputs["input_ids"]
+            labels = inputs["labels"]
+            all_input_ids.append(input_ids)
+            all_labels.append(labels)
+        
+        with open("")
+
+        exit()
+
+    else:
+        data_collator = DataCollatorForDistillLM(
+            tokenizer = tokenizer, mlm=data_args.mlm,
+            mlm_probability=data_args.mlm_probability,
+            mlm_sample_times=16,
+            selector = mask_selector
+        )
+
+        # Initialize our Trainer
+        trainer = Trainer(
+            model=model,
+            args=training_args,
+            data_collator=data_collator,
+            train_dataset=train_dataset,
+            eval_dataset=eval_dataset,
+        )
 
     # Training
     if training_args.do_train:
@@ -307,7 +353,6 @@ def main():
     results = {}
     if training_args.do_eval:
         logger.info("*** Evaluate ***")
-
         eval_output = trainer.evaluate()
 
         perplexity = math.exp(eval_output["eval_loss"])
@@ -322,8 +367,8 @@ def main():
                     writer.write("%s = %s\n" % (key, str(result[key])))
 
         results.update(result)
-
     return results
+
 
 
 def _mp_fn(index):

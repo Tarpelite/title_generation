@@ -317,18 +317,11 @@ class DataCollatorForDistillLM(DataCollator):
                     sl_labels.append(1)
                 else:
                     sl_labels.append(0)
-            # print(sl_labels)
-            # print("selected labels:")
-            # print(selected_labels)
+
             all_inputs.append(instance.input_ids)
             all_attention_mask.append(instance.attention_mask)
             all_token_type_ids.append(instance.token_type_ids)
             all_labels.append(sl_labels)
-
-            # print("input_ids:")
-            # print(selected_instance)
-            # print("labels:")
-            # print(sl_labels)
 
         return {
             "input_ids":torch.tensor(all_inputs, dtype=torch.long),
@@ -424,24 +417,17 @@ class DataCollatorForSelectLM(DataCollator):
             selected_inputs = selected_instance.detach().cpu().numpy()
             selected_labels = labels[0].detach().cpu().numpy()
 
-            # print("mask inputs : {}".format(" ".join([self.tokenizer._convert_id_to_token(x) for x in selected_inputs])))
 
-            # print("origin inputs : {}".format(" ".join([self.tokenizer._convert_id_to_token(x) for x in selected_labels])))
 
             all_inputs.append(selected_instance)
             all_labels.append(labels[0])
-        # print(len(all_inputs), all_inputs[0].shape)
-        # print(labels.shape)
+
         return {
             "input_ids":torch.stack(all_inputs, dim=0),
             "labels": torch.stack(all_labels, dim=0)
         }
 
-        # if self.mlm:
-        #     inputs, labels = self.mask_tokens(batch)
-        #     return {"input_ids": inputs, "labels": labels}
-        # else:
-        #     return {"input_ids": batch, "labels": batch}
+
 
     def _tensorize_batch(self, examples: List[torch.Tensor]) -> torch.Tensor:
         length_of_first = examples[0].size(0)
@@ -490,3 +476,4 @@ class DataCollatorForSelectLM(DataCollator):
 
         # The rest of the time (10% of the time) we keep the masked input tokens unchanged
         return inputs, labels
+
