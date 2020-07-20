@@ -23,6 +23,7 @@ using a masked language modeling (MLM) loss.
 import logging
 import math
 import os
+import sys
 from dataclasses import dataclass, field
 from typing import Optional
 from tqdm import tqdm
@@ -282,7 +283,7 @@ def main():
     train_dataset = get_dataset(data_args, tokenizer=tokenizer, model_args=model_args) if training_args.do_train else None
     eval_dataset = get_dataset(data_args, model_args=None, tokenizer=tokenizer, evaluate=True) if training_args.do_eval else None
 
-    if len(training_args.train_data_cache_path) > 0:
+    if len(data_args.train_data_cache_path) > 0:
         data_collator = DataCollatorForSelectLM(
             tokenizer = tokenizer, mlm=data_args.mlm,
             mlm_probability=data_args.mlm_probability,
@@ -323,7 +324,7 @@ def main():
             "input_ids":all_input_ids,
             "labels": all_labels
         }
-        torch.save(cache_data, training_args.train_data_cache_path)
+        torch.save(cache_data, data_args.train_data_cache_path)
         sys.exit(0)
 
     else:
