@@ -323,8 +323,8 @@ def main():
             "input_ids":all_input_ids,
             "labels": all_labels
         }
-
-        exit()
+        torch.save(cache_data, training_args.train_data_cache_path)
+        sys.exit(0)
 
     else:
         data_collator = DataCollatorForDistillLM(
