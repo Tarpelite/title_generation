@@ -310,6 +310,8 @@ def main():
         epoch_iterator = tqdm(train_dataloader)
         
         for step, inputs in epoch_iterator:
+            print(inputs)
+            break
             input_ids = inputs["input_ids"]
             labels = inputs["labels"]
             all_input_ids.append(input_ids)
