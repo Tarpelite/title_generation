@@ -316,13 +316,13 @@ def main():
             for ins in input_ids:
                 all_input_ids.append(ins)
             for las in labels:
-                all_labels.append(labels)
+                all_labels.append(las)
         
-
+        assert len(all_input_ids) == len(all_labels)
         all_input_ids = torch.stack(all_input_ids, dim=0)
         all_labels = torch.stack(all_labels, dim=0)
 
-        assert len(all_input_ids) == len(all_labels)
+        
 
         cache_data = {
             "input_ids":all_input_ids,
