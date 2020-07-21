@@ -237,11 +237,12 @@ class DataCollatorForTrainGen(DataCollator):
             sl_labels = []
             mask_token_id = self.tokenizer.convert_tokens_to_ids(self.tokenizer.mask_token)
             for i in instance["labels"]:
-                if i == mask_token_id:
+                if i !=-100 :
                     sl_labels.append(1)
                 else:
                     sl_labels.append(0)
             all_labels.append(sl_labels)
+
         return {
             "input_ids":torch.stack(all_inputs, dim=0),
             "labels":torch.tensor(all_labels, dtype=torch.long)
