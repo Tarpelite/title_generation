@@ -468,7 +468,7 @@ class Trainer:
                 epoch_iterator = tqdm(train_dataloader, desc="Iter (loss=X.XXX)", disable=not self.is_local_master())
 
             for step, inputs in enumerate(epoch_iterator):
-                
+
                 # Skip past any already trained steps if resuming training
                 if steps_trained_in_current_epoch > 0:
                     steps_trained_in_current_epoch -= 1
@@ -590,13 +590,13 @@ class Trainer:
 
         outputs = model(**inputs)
         loss = outputs[0]  # model outputs are always tuple in transformers (see doc)
-        # logits = outputs[1]
+        logits = outputs[1]
 
-        # preds = torch.argmax(logits, dim=-1)
-        # print("labels:")
-        # print(inputs["labels"])
-        # print("preds:")
-        # print(preds)
+        preds = torch.argmax(logits, dim=-1)
+        print("labels:")
+        print(inputs["labels"])
+        print("preds:")
+        print(preds)
 
         if self.args.n_gpu > 1:
             loss = loss.mean()  # mean() to average on multi-gpu parallel training
