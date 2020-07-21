@@ -597,6 +597,8 @@ class Trainer:
         print(inputs["labels"])
         print("preds:")
         print(preds)
+        print("num_masks:")
+        print(torch.sum(preds))
 
         if self.args.n_gpu > 1:
             loss = loss.mean()  # mean() to average on multi-gpu parallel training
