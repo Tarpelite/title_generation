@@ -201,7 +201,7 @@ def main():
             for j in range(seq_len):
                 if label_ids[i, j] != nn.CrossEntropyLoss().ignore_index:
                     out_label_list[i].append(label_map[label_ids[i][j]])
-                    preds_list[i].append(label_map[preds[i][j]])
+                        preds_list[i].append(label_map[preds[i][j]])
 
         return preds_list, out_label_list
 
