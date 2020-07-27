@@ -110,7 +110,7 @@ class MaskGenerator:
         # preds = torch.argmax(logits, dim=-1)
         # print(torch.sum(preds))
 
-        return all_preds
+        return torch.tensor(all_preds)
 
         
 class TextDataset(Dataset):
