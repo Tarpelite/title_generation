@@ -75,10 +75,13 @@ class MaskGenerator:
         self.args = args
     
     def predict(self,
-        batch):
+        batch, sample_rate=0.15):
         model = self.model
         if self.args.n_gpu > 1:
             model = torch.nn.DataParallel(model)
+
+
+
         else:
             model = self.model
         model.eval()
@@ -89,11 +92,25 @@ class MaskGenerator:
             outputs = model(**batch)
             logits = outputs[0] #[batch_size, seq_len, hidden_size]
         
-        # 0 for unchanged token, 1 for masking token
-        preds = torch.argmax(logits, dim=-1)
-        print(torch.sum(preds))
+        sequence_size = batch.size(1)
+        sample_size = int(sample_rate*sequence_size)
+        all_preds = []
+        for instance_logits in logits:
+            logits_1 = [ (i,x[1]) for i, x in enumerate(instance_logits)]
+            sorted_logits_1 = sorted(logits_1, lambda x:x[1])
+            mask_index = sorted_logits_1[:sample_size]
 
-        return preds.detach().cpu()
+            instance_mask = [0]*sequence_size
+
+            for i in mask_index:
+                instance_mask[i[0]] = 1
+            all_preds.append(instance_mask)
+            
+        # 0 for unchanged token, 1 for masking token
+        # preds = torch.argmax(logits, dim=-1)
+        # print(torch.sum(preds))
+
+        return all_preds
 
         
 class TextDataset(Dataset):
