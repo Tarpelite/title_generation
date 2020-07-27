@@ -92,7 +92,7 @@ class MaskGenerator:
             outputs = model(**batch)
             logits = outputs[0] #[batch_size, seq_len, hidden_size]
         
-        sequence_size = batch.size(1)
+        sequence_size = batch["input_ids"].size(1)
         sample_size = int(sample_rate*sequence_size)
         all_preds = []
         for instance_logits in logits:
