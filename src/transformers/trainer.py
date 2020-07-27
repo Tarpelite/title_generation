@@ -590,11 +590,14 @@ class Trainer:
 
         outputs = model(**inputs)
         loss = outputs[0]  # model outputs are always tuple in transformers (see doc)
-        # logits = outputs[1]
+        logits = outputs[1]
 
         # preds = torch.argmax(logits, dim=-1)
-        # print("labels:")
-        # print(inputs["labels"])
+        print("labels:")
+        print(inputs["labels"])
+
+        print("logits:")
+        print(logits)
         # print("preds:")
         # print(preds)
         # print("num_masks:")
