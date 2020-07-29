@@ -311,7 +311,7 @@ def main():
 
         train_dataloader  = DataLoader(
             train_dataset,
-            batch_size=16,
+            batch_size=128,
             sampler = train_sampler,
             collate_fn = data_collator.collate_batch,
             drop_last = False,
@@ -320,13 +320,13 @@ def main():
 
         epoch_iterator = tqdm(train_dataloader)
         for score in epoch_iterator:
-            print(score)
+            # print(score)
             all_scores.extend(score)
         
         print("avg tgt score:")
         print(sum(all_scores)/ len(all_scores))
         exit()
-        
+    
 
     data_collator = DataCollatorForMaskGen(
         tokenizer=tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability, generator=mask_generator

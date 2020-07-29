@@ -78,6 +78,7 @@ class MaskSelector:
         with torch.no_grad():
             outputs = model(**mask_batch)
             logits = outputs[0]
+            
         # src-0,tgt-1
         preds = logits.detach().cpu().numpy()
         preds = [x[1] for x in preds]
