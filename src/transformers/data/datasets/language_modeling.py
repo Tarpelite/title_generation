@@ -309,25 +309,46 @@ class FullyLineByLineTextDataset(Dataset):
 class MixTextDataset(Dataset):
     def __init__(self, tokenizer:PreTrainedTokenizer, file_path:str, block_size:int):
 
-        assert os.path.isfile(file_path)
-        # Here, we do not cache the features, operating under the assumption
-        # that we will soon use fast multithreaded tokenizers from the
-        # `tokenizers` repo everywhere =)
-        logger.info("Creating features from dataset file at %s", file_path)
-        lines = []
-        labels = []
-        with open(file_path, encoding="utf-8") as f:
-            for line in tqdm(f.read().splitlines()):
-                label, line = line.split("\t")
+        cached_features_file = os.path.join(
+            cache_dir if cache_dir is not None else None,
+            "cached_{}_{}_{}_{}".format(
+                "select_lm", tokenizer.__class__.__name__, "200", "select_lm",
+            ),
+        )
+        lock_path = cached_features_file + ".lock"
+    
+        if os.path.exists(cached_features_file) :
+            start = time.time()
+            self.example, self.labels = torch.load(cached_features_file)
+            logger.info(
+                f"Loading features from cached file {cached_features_file} [took %.3f s]", time.time() - start
+            )
+        else:
+            assert os.path.isfile(file_path)
+            # Here, we do not cache the features, operating under the assumption
+            # that we will soon use fast multithreaded tokenizers from the
+            # `tokenizers` repo everywhere =)
+            logger.info("Creating features from dataset file at %s", file_path)
+            lines = []
+            labels = []
+            with open(file_path, encoding="utf-8") as f:
+                for line in tqdm(f.read().splitlines()):
+                    label, line = line.split("\t")
 
-                if len(line) > 0 and not line.isspace():
-                    lines.append(line)
-                labels.append(int(label))
-        
-        batch_encoding = tokenizer.batch_encode_plus(lines, add_special_tokens=True, max_length=block_size)
+                    if len(line) > 0 and not line.isspace():
+                        lines.append(line)
+                    labels.append(int(label))
+            
+            batch_encoding = tokenizer.batch_encode_plus(lines, add_special_tokens=True, max_length=block_size)
 
-        self.examples = batch_encoding["input_ids"]
-        self.labels = labels
+            self.examples = batch_encoding["input_ids"]
+            self.labels = labels
+            start = time.time()
+            torch.save((self.examples, self.labels), cached_features_file)
+            # ^ This seems to take a lot of time so I want to investigate why and how we can improve.
+            logger.info(
+                "Saving features into cached file %s [took %.3f s]", cached_features_file, time.time() - start
+            )
 
         assert len(self.examples) == len(self.labels)
     
