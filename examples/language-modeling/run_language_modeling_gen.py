@@ -37,6 +37,7 @@ from transformers import (
     DataCollatorForWeightedLanguageModeling,
     DataCollatorForSelectLM,
     DataCollatorForMaskGen,
+    DataCollatorForCheckMaskGen,
     HfArgumentParser,
     LineByLineTextDataset,
     FullyLineByLineTextDataset,
@@ -90,8 +91,13 @@ class ModelArguments:
             "help": "The model checkpoint for weights initialization. Leave None if you want to train a model from scratch."
         },
     )
-
-
+    cls_model_name_or_path: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": "The model checkpoint for weights initialization. Leave None if you want to train a model from scratch."
+        },
+    )
+    
 @dataclass
 class DataTrainingArguments:
     """
@@ -225,6 +231,7 @@ def main():
             config=config,
             cache_dir=model_args.cache_dir,
         )
+
     else:
         logger.info("Training new model from scratch")
         model = AutoModelWithLMHead.from_config(config)
@@ -245,6 +252,22 @@ def main():
         )
         gen_model.resize_token_embeddings(len(tokenizer))
         mask_generator = MaskGenerator(gen_model,training_args)
+    
+    if model_args.cls_model_name_or_path:
+        cls_config = AutoConfig.from_pretrained(
+            model_args.cls_model_name_or_path,
+            num_labels=2,
+            finetuning_task="cola",
+            cache_dir=model_args.cache_dir,
+        )
+        cls_model = AutoModelForSequenceClassification.from_pretrained(
+            model_args.cls_model_name_or_path,
+            from_tf=bool(".ckpt" in model_args.cls_model_name_or_path),
+            config=cls_config,
+            cache_dir=model_args.cache_dir,
+        )
+        cls_model.resize_token_embeddings(len(tokenizer))
+        mask_selector = MaskSelector(cls_model,training_args)
 
     model.resize_token_embeddings(len(tokenizer))
     
@@ -266,10 +289,44 @@ def main():
     train_dataset = get_dataset(data_args, tokenizer=tokenizer, model_args=model_args) if training_args.do_train else None
     eval_dataset = get_dataset(data_args, model_args=None, tokenizer=tokenizer, evaluate=True) if training_args.do_eval else None
 
-    
+    if args.cls_model_name_or_path:
+        data_collator = DataCollatorForCheckMaskGen(
+            tokenizer=tokenizer,
+            mlm=data_args.mlm,
+            mlm_probability=data_args.mlm_probability,
+            generator = mask_generator,
+            selector=mask_selector
+
+        )
+        train_sampler = (
+                    RandomSampler(train_dataset)
+                    if training_args.local_rank == -1
+                    else DistributedSampler(train_dataset)
+                )
+
+        train_dataloader  = DataLoader(
+            train_dataset,
+            batch_size=16,
+            sampler = train_sampler,
+            collate_fn = data_collator.collate_batch,
+            drop_last = False,
+        )
+        all_scores = []
+
+        epoch_iterator = tqdm(train_dataloader)
+        for score in epoch_iterator:
+            print(score)
+            all_scores.extend(score)
+        
+        print("avg tgt score:")
+        print(sum(all_scores)/ len(all_scores))
+        exit()
+        
+
     data_collator = DataCollatorForMaskGen(
         tokenizer=tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability, generator=mask_generator
     )
+
     
 
     # Initialize our Trainer

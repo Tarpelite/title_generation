@@ -59,9 +59,30 @@ class MaskSelector:
         # src-0,tgt-1
         preds = logits.detach().cpu().numpy()
         preds = [x[1] for x in preds]
+
         # print("max_logits:{} min_logits:{}".format(max(preds), min(preds)))
         return np.argmax(preds)
+    
+    def score(
+        self,
+        mask_batch):
 
+        model = self.model
+        if self.args.n_gpu > 1:
+            model = torch.nn.DataParallel(model)
+        else:
+            model = self.model
+        model.eval()
+        for k, v in mask_batch.items():
+            mask_batch[k] = v.to(self.args.device)
+        with torch.no_grad():
+            outputs = model(**mask_batch)
+            logits = outputs[0]
+        # src-0,tgt-1
+        preds = logits.detach().cpu().numpy()
+        preds = [x[1] for x in preds]
+
+        return preds
 
 class MaskGenerator:
     model: PreTrainedModel

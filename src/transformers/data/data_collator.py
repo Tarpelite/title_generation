@@ -148,6 +148,65 @@ class DataCollatorForLanguageModeling(DataCollator):
         return inputs, labels
 
 @dataclass
+
+class DataCollartorForCheckMaskGen(DataCollator):
+    tokenizer:PreTrainedTokenizer
+    selector: MaskSelector
+    generator: MaskGenerator
+    mlm: bool = True
+    mlm_probability: float = 0.15
+
+    def collate_batch(self, example: List) -> Dict[str, torch.Tensor]:
+        all_input_ids = torch.tensor([instance.input_ids for instance in examples], dtype=torch.long)
+        all_attention_mask = torch.tensor([instance.attention_mask for instance in examples], dtype=torch.long)
+        all_token_type_ids = torch.tensor([instance.token_type_ids for instance in examples], dtype=torch.long)
+
+        generator_input = {
+            "input_ids":all_input_ids,
+            "attention_mask":all_attention_mask,
+            "token_type_ids": all_token_type_ids
+        }
+
+        out = self.generator.predict(generator_input).float() # out shape same as input_ids
+        print(out)
+        all_labels = all_input_ids.clone()
+        special_tokens_mask = [
+            self.tokenizer.get_special_tokens_mask(val, already_has_special_tokens=True) for val in all_labels.tolist()
+        ]
+        out.masked_fill(torch.tensor(special_tokens_mask, dtype=torch.bool), value=0.0)
+        if self.tokenizer._pad_token is not None:
+            padding_mask = all_labels.eq(self.tokenizer.pad_token_id)
+            out.masked_fill(padding_mask, value=0.0)
+        
+        masked_indices = torch.bernoulli(out).bool()
+        all_labels[~masked_indices] = -100
+
+        indices_replaced = torch.bernoulli(torch.full(out.shape, 0.8)).bool() & masked_indices
+
+        all_input_ids[indices_replaced] = self.tokenizer.convert_tokens_to_ids(self.tokenizer.mask_token)
+
+        indices_random = torch.bernoulli(torch.full(all_labels.shape, 0.5)).bool() & masked_indices & ~indices_replaced
+
+        random_words = torch.randint(len(self.tokenizer), all_labels.shape, dtype=torch.long)
+
+        all_input_ids[indices_random] = random_words[indices_random]
+
+        scorer_input = {
+            "input_ids": all_input_ids,
+            "labels": all_labels
+        }
+
+        score = self.selector.score(scorer_input)
+
+        return score
+        
+    
+
+
+
+
+
+@dataclass
 class DataCollatorForWeightedLanguageModeling(DataCollator):
 
     tokenizer: PreTrainedTokenizer
