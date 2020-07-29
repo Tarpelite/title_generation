@@ -31,7 +31,7 @@ from transformers import (
     MODEL_WITH_LM_HEAD_MAPPING,
     AutoConfig,
     AutoModelWithLMHead,
-    BertModelForPreTraining,
+    BertForPreTraining,
     AutoModelForSequenceClassification,
     AutoTokenizer,
     DataCollatorForLanguageModeling,
@@ -224,7 +224,7 @@ def main():
         )
 
     if model_args.model_name_or_path:
-        model = AutoModelWithLMHead.from_pretrained(
+        model = BertForPreTraining.from_pretrained(
             model_args.model_name_or_path,
             from_tf=bool(".ckpt" in model_args.model_name_or_path),
             config=config,
@@ -232,7 +232,7 @@ def main():
         )
     else:
         logger.info("Training new model from scratch")
-        model = AutoModelWithLMHead.from_config(config)
+        model = BertForPreTraining.from_config(config)
     
     if model_args.cls_model_name_or_path:
         cls_config = AutoConfig.from_pretrained(
