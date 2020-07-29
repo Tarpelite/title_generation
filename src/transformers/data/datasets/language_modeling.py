@@ -78,7 +78,7 @@ class MaskSelector:
         with torch.no_grad():
             outputs = model(**mask_batch)
             logits = outputs[0]
-            
+
         # src-0,tgt-1
         preds = logits.detach().cpu().numpy()
         preds = [x[1] for x in preds]
@@ -120,6 +120,7 @@ class MaskGenerator:
         for instance_logits in logits:
             logits_1 = [ (i,x[1]) for i, x in enumerate(instance_logits)]
             sorted_logits_1 = sorted(logits_1, key = lambda x:x[1])
+            print(sorted_logits_1[:10])
             mask_index = sorted_logits_1[:sample_size]
 
             instance_mask = [0]*sequence_size
