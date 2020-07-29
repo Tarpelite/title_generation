@@ -261,25 +261,10 @@ def main():
     train_dataset = get_dataset(data_args, tokenizer=tokenizer, model_args=model_args) if training_args.do_train else None
     eval_dataset = get_dataset(data_args, model_args=None, tokenizer=tokenizer, evaluate=True) if training_args.do_eval else None
 
-    if len(data_args.weighted_vocab) > 0:
-        weighted_vocab = []
-        with open(data_args.weighted_vocab, "r", encoding="utf-8") as f:
-            for line in tqdm(f.readlines()):
-                line = float(line.strip())
-                weighted_vocab.append(line)
-        assert len(weighted_vocab) == len(tokenizer.vocab)
-
-        data_collator = DataCollatorForWeightedLanguageModeling(
-            tokenizer = tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability, weighted_vocab=weighted_vocab
-        )
-    elif data_args.mlm_sample_times > 1:
-        data_collator = DataCollatorForSelectLM(
-            tokenizer = tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability, mlm_sample_times=data_args.mlm_sample_times, selector = mask_selector
-        )
-    else:
-        data_collator = DataCollatorForLanguageModeling(
-            tokenizer=tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability
-        )
+   
+    data_collator = DataCollatorForMixLM(
+        tokenizer=tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability
+    )
     
 
     # Initialize our Trainer
