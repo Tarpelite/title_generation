@@ -269,7 +269,7 @@ class DataCollatorForMixLM(DataCollator):
     mlm_probability: float = 0.15
 
     def collate_batch(self, examples:List) -> Dict[str, torch.Tensor]:
-        input_examples = [x[0] for x in examples]
+        input_examples = [torch.tensor(x[0], dtype=torch.long) for x in examples]
         all_input_ids = self._tensorize_batch(input_examples)
         # all_input_ids = torch.tensor([x[0] for x in examples], dtype=torch.long)
 
