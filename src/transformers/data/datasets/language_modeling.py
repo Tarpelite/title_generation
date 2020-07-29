@@ -307,7 +307,7 @@ class FullyLineByLineTextDataset(Dataset):
 
 
 class MixTextDataset(Dataset):
-    def __init__(self, tokenizer:PreTrainedTokenizer, file_path:str, block_size:int):
+    def __init__(self, tokenizer:PreTrainedTokenizer, file_path:str, block_size:int, cache_dir:str):
 
         cached_features_file = os.path.join(
             cache_dir if cache_dir is not None else None,
