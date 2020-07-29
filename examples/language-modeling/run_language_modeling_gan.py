@@ -44,6 +44,7 @@ from transformers import (
     PreTrainedTokenizer,
     TextDataset,
     Trainer,
+    GANTrainer,
     TrainingArguments,
     MaskSelector,
     set_seed,
@@ -275,7 +276,7 @@ def main():
     
 
     # Initialize our Trainer
-    trainer = Trainer(
+    trainer = GANTrainer(
         generator=model,
         discriminator=cls_model,
         args=training_args,
