@@ -591,8 +591,8 @@ class Trainer:
 
         outputs = model(**inputs)
         loss = outputs[0]  # model outputs are always tuple in transformers (see doc)
-        domain_loss = outputs[1]
-        print("domain loss:", domain_loss)
+        # domain_loss = outputs[1]
+        # print("domain loss:", domain_loss)
         # logits = outputs[1]
         # logits_1 = [x[1] for x in logits.view(-1, 2)]
 
