@@ -149,7 +149,7 @@ class DataCollatorForLanguageModeling(DataCollator):
 
 @dataclass
 
-class DataCollartorForCheckMaskGen(DataCollator):
+class DataCollatorForCheckMaskGen(DataCollator):
     tokenizer:PreTrainedTokenizer
     selector: MaskSelector
     generator: MaskGenerator
