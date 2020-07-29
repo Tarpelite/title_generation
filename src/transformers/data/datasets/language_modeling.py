@@ -319,7 +319,7 @@ class MixTextDataset(Dataset):
     
         if os.path.exists(cached_features_file) :
             start = time.time()
-            self.example, self.labels = torch.load(cached_features_file)
+            self.examples, self.labels = torch.load(cached_features_file)
             logger.info(
                 f"Loading features from cached file {cached_features_file} [took %.3f s]", time.time() - start
             )
