@@ -868,7 +868,7 @@ class BertForPreTraining(BertPreTrainedModel):
             masked_lm_loss = loss_fct(prediction_scores.view(-1, self.config.vocab_size), labels.view(-1))
             next_sentence_loss = loss_fct(seq_relationship_score.view(-1, 2), next_sentence_label.view(-1))
             total_loss = masked_lm_loss + next_sentence_loss
-            outputs = (total_loss,) + outputs
+            outputs = (total_loss, next_sentence_loss) + outputs
 
         return outputs  # (loss), prediction_scores, seq_relationship_score, (hidden_states), (attentions)
 
@@ -1611,3 +1611,4 @@ class BertForQuestionAnswering(BertPreTrainedModel):
             outputs = (total_loss,) + outputs
 
         return outputs  # (loss), start_logits, end_logits, (hidden_states), (attentions)
+

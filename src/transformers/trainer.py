@@ -21,6 +21,7 @@ from tqdm.auto import tqdm, trange
 
 from .data.data_collator import DataCollator, DefaultDataCollator
 from .modeling_utils import PreTrainedModel
+from .modeling_bert import BertForPreTraining
 from .optimization import AdamW, get_linear_schedule_with_warmup
 from .trainer_utils import PREFIX_CHECKPOINT_DIR, EvalPrediction, PredictionOutput, TrainOutput
 from .training_args import TrainingArguments, is_torch_tpu_available
@@ -590,6 +591,8 @@ class Trainer:
 
         outputs = model(**inputs)
         loss = outputs[0]  # model outputs are always tuple in transformers (see doc)
+        domain_loss = outputs[1]
+        print("domain loss:", domain_loss)
         # logits = outputs[1]
         # logits_1 = [x[1] for x in logits.view(-1, 2)]
 

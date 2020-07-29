@@ -17,6 +17,7 @@ from ...optimization import AdamW, get_linear_schedule_with_warmup
 import random
 import json
 import copy
+from tqdm import tqdm
 
 def set_seed(seed: int):
     random.seed(seed)
@@ -304,3 +305,40 @@ class FullyLineByLineTextDataset(Dataset):
     def __getitem__(self, i) -> InputFeatures:
         return self.features[i]
 
+
+class MixTextDataset(Dataset):
+    def __init__(self, tokenizer:PreTrainedTokenizer, file_path:str, block_size:int):
+
+        assert os.path.isfile(file_path)
+        # Here, we do not cache the features, operating under the assumption
+        # that we will soon use fast multithreaded tokenizers from the
+        # `tokenizers` repo everywhere =)
+        logger.info("Creating features from dataset file at %s", file_path)
+        lines = []
+        labels = []
+        with open(file_path, encoding="utf-8") as f:
+            for line in tqdm(f.read().splitlines()):
+                label, line = line.split("\t")
+
+                if len(line) > 0 and not line.isspace():
+                    lines.append(line)
+                labels.append(int(label))
+        
+        batch_encoding = tokenizer.batch_encode_plus(lines, add_special_tokens=True, max_length=block_size)
+
+        self.examples = batch_encoding["input_ids"]
+        self.labels = labels
+
+        assert len(self.examples) == len(self.labels)
+    
+    def __len__(self):
+        return len(self.examples)
+    
+    def __getitem__(self, i):
+
+        return [self.examples[i], self.labels[i]]
+
+
+
+
+    
