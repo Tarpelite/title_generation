@@ -1022,7 +1022,7 @@ class GANTrainer:
                 "weight_decay": 0.0,
             },
             {
-                "params": [p for n,p in self.discriminator.named_paramters()],
+                "params": [p for n,p in self.discriminator.named_parameters()],
                 "lr": 0.0
             }
         ]
