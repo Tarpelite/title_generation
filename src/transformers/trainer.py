@@ -1326,11 +1326,11 @@ class GANTrainer:
         gen_outputs = gen_outputs[0]
 
         mask_index = torch.argmax(gen_outputs, dim=-1)
-        # print(mask_index)
+        print(mask_index)
         dis_input_ids = mask_index*103 + (1-mask_index)*inputs["input_ids"].clone()
 
-        # print(dis_input_ids)
-        labels = torch.tensor([1]*dis_input_ids.size(0), dtype=torch.long).to(self.args.device)
+        print(dis_input_ids)
+        labels = torch.tensor([0]*dis_input_ids.size(0), dtype=torch.long).to(self.args.device)
 
         dis_input = {
             "input_ids":dis_input_ids,
