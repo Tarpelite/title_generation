@@ -877,6 +877,7 @@ class GANTrainer:
         generator: PreTrainedModel,
         discriminator: PreTrainedModel,
         args: TrainingArguments,
+        mask_token_id,
         data_collator: Optional[DataCollator] = None,
         train_dataset: Optional[Dataset] = None,
         eval_dataset: Optional[Dataset] = None,
@@ -884,6 +885,7 @@ class GANTrainer:
         prediction_loss_only=False,
         tb_writer: Optional["SummaryWriter"] = None,
         optimizers: Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler.LambdaLR] = None,
+        
     ):
         """
         Trainer is a simple but feature-complete training and eval loop for PyTorch,
@@ -906,6 +908,7 @@ class GANTrainer:
         self.compute_metrics = compute_metrics
         self.prediction_loss_only = prediction_loss_only
         self.optimizers = optimizers
+        self.mask_token_id = mask_token_id
         if tb_writer is not None:
             self.tb_writer = tb_writer
         elif is_tensorboard_available() and self.is_world_master():
@@ -1327,7 +1330,7 @@ class GANTrainer:
 
         mask_index = torch.argmax(gen_outputs, dim=-1)
         print(mask_index)
-        dis_input_ids = mask_index*103 + (1-mask_index)*inputs["input_ids"].clone()
+        dis_input_ids = mask_index*self.mask_token_id + (1-mask_index)*inputs["input_ids"].clone()
 
         print(dis_input_ids)
         labels = torch.tensor([0]*dis_input_ids.size(0), dtype=torch.long).to(self.args.device)

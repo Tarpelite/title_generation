@@ -282,6 +282,7 @@ def main():
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
         prediction_loss_only=True,
+        mask_token_id = tokenizer.mask_token_id
     )
 
     # Training
