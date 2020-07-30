@@ -1319,6 +1319,7 @@ class GANTrainer:
         gen_outputs = generator(**inputs)
         gen_outputs = gen_outputs[0]
 
+        print(gen_outputs)
         mask_index = torch.argmax(gen_outputs, dim=-1)
         dis_input_ids = mask_index*103 + (1-mask_index)*inputs["input_ids"].clone()
 
@@ -1334,23 +1335,6 @@ class GANTrainer:
         dis_outputs = discriminator(**dis_input)
         loss  = dis_outputs[0]
 
-        # loss = outputs[0]  # model outputs are always tuple in transformers (see doc)
-        # domain_loss = outputs[1]
-        # print("domain loss:", domain_loss)
-        # logits = outputs[1]
-        # logits_1 = [x[1] for x in logits.view(-1, 2)]
-
-
-        # preds = torch.argmax(logits, dim=-1)
-        # print("labels:")
-        # print(inputs["labels"])
-
-        # print("logits:")
-        # print(logits_1)
-        # print("preds:")
-        # print(preds)
-        # print("num_masks:")
-        # print(torch.sum(preds))
 
         if self.args.n_gpu > 1:
             loss = loss.mean()  # mean() to average on multi-gpu parallel training
