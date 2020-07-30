@@ -196,9 +196,19 @@ def main():
     # download model & vocab.
 
     if model_args.config_name:
-        config = AutoConfig.from_pretrained(model_args.config_name, cache_dir=model_args.cache_dir)
+        config = AutoConfig.from_pretrained(
+            model_args.config_name, 
+            num_labels=2,
+            id2label = {0:"0", 1:"1"},
+            label2id={"0":0, "1":1  },
+            cache_dir=model_args.cache_dir)
     elif model_args.model_name_or_path:
-        config = AutoConfig.from_pretrained(model_args.model_name_or_path, cache_dir=model_args.cache_dir)
+        config = AutoConfig.from_pretrained(
+            model_args.model_name_or_path, 
+            num_labels=2,
+            id2label = {0:"0", 1:"1"},
+            label2id={"0":0, "1":1  },
+            cache_dir=model_args.cache_dir)
     else:
         config = CONFIG_MAPPING[model_args.model_type]()
         logger.warning("You are instantiating a new config instance from scratch.")
@@ -214,15 +224,12 @@ def main():
         )
 
     if model_args.model_name_or_path:
-        model = AutoModelWithLMHead.from_pretrained(
+        model = AutoModelForTokenClassification.from_pretrained(
             model_args.model_name_or_path,
             from_tf=bool(".ckpt" in model_args.model_name_or_path),
             config=config,
             cache_dir=model_args.cache_dir,
         )
-    else:
-        logger.info("Training new model from scratch")
-        model = AutoModelWithLMHead.from_config(config)
     
     if model_args.cls_model_name_or_path:
         cls_config = AutoConfig.from_pretrained(
