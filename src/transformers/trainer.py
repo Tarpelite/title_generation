@@ -1022,9 +1022,10 @@ class GANTrainer:
                 "weight_decay": 0.0,
             },
             {
-                "params": [p for n,p in self.discriminator.named_parameters()],
-                "lr": 0.0
-            }
+                "params": [p for n,p in self.discriminator.named_parameters(),
+                "lr": 0.0000001
+            },
+
         ]
         optimizer = AdamW(optimizer_grouped_parameters, lr=self.args.learning_rate, eps=self.args.adam_epsilon)
         scheduler = get_linear_schedule_with_warmup(
