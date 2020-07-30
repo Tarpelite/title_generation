@@ -1024,10 +1024,12 @@ class GANTrainer:
             {
                 "params": [p for n, p in self.discriminator.named_parameters() if not any(nd in n for nd in no_decay)],
                 "weight_decay": self.args.weight_decay,
+                "lr":0.0
             },
             {
                 "params": [p for n, p in self.discriminator.named_parameters() if any(nd in n for nd in no_decay)],
                 "weight_decay": 0.0,
+                "lr":0.0
             },
 
         ]
@@ -1324,10 +1326,10 @@ class GANTrainer:
         gen_outputs = gen_outputs[0]
 
         mask_index = torch.argmax(gen_outputs, dim=-1)
-        print(mask_index)
+        # print(mask_index)
         dis_input_ids = mask_index*103 + (1-mask_index)*inputs["input_ids"].clone()
 
-        print(dis_input_ids)
+        # print(dis_input_ids)
         labels = torch.tensor([1]*dis_input_ids.size(0), dtype=torch.long).to(self.args.device)
 
         dis_input = {
