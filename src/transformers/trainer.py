@@ -1324,7 +1324,7 @@ class GANTrainer:
 
         
 
-        labels = torch.tensor([1]*dis_input_ids.size(0), dtype=torch.long).to(device)
+        labels = torch.tensor([1]*dis_input_ids.size(0), dtype=torch.long).to(self.args.device)
 
         dis_input = {
             "input_ids":dis_input_ids,
