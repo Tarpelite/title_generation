@@ -874,7 +874,8 @@ class GANTrainer:
 
     def __init__(
         self,
-        model: PreTrainedModel,
+        generator: PreTrainedModel,
+        discriminator: PreTrainedModel,
         args: TrainingArguments,
         data_collator: Optional[DataCollator] = None,
         train_dataset: Optional[Dataset] = None,
