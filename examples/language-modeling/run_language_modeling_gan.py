@@ -142,9 +142,9 @@ class DataTrainingArguments:
     )
 
 
-def get_dataset(args: DataTrainingArguments, tokenizer: PreTrainedTokenizer,model_args:ModelArguments, evaluate=False):
+def get_dataset(args: DataTrainingArguments, tokenizer: PreTrainedTokenizer,model_args:ModelArguments, evaluate=False, cache_dir=None):
     file_path = args.eval_data_file if evaluate else args.train_data_file
-    return LineByLineTextDataset(tokenizer=tokenizer, file_path=file_path, block_size=args.block_size, cache_dir=model_args.cache_dir)
+    return LineByLineTextDataset(tokenizer=tokenizer, file_path=file_path, block_size=args.block_size, cache_dir=cache_dir)
 
 def main():
     # See all possible arguments in src/transformers/training_args.py
@@ -257,7 +257,7 @@ def main():
 
     # Get datasets
 
-    train_dataset = get_dataset(data_args, tokenizer=tokenizer, model_args=model_args) if training_args.do_train else None
+    train_dataset = get_dataset(data_args, tokenizer=tokenizer, model_args=model_args, cache_dir=model_args.cache_dir) if training_args.do_train else None
     eval_dataset = get_dataset(data_args, model_args=None, tokenizer=tokenizer, evaluate=True) if training_args.do_eval else None
 
     
