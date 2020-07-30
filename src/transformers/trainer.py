@@ -1408,7 +1408,7 @@ class GANTrainer:
         logger.info("Saving model checkpoint to %s", output_dir)
         # Save a trained model and configuration using `save_pretrained()`.
         # They can then be reloaded using `from_pretrained()`
-        if not isinstance(self.model, PreTrainedModel):
+        if not isinstance(self.generator, PreTrainedModel):
             raise ValueError("Trainer.model appears to not be a PreTrainedModel")
         self.generator.save_pretrained(output_dir)
 
