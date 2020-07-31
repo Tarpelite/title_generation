@@ -189,11 +189,6 @@ def main():
     # Set seed
     set_seed(training_args.seed)
 
-    # Load pretrained model and tokenizer
-    #
-    # Distributed training:
-    # The .from_pretrained methods guarantee that only one local process can concurrently
-    # download model & vocab.
 
     if model_args.config_name:
         config = AutoConfig.from_pretrained(

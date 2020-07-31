@@ -591,23 +591,7 @@ class Trainer:
 
         outputs = model(**inputs)
         loss = outputs[0]  # model outputs are always tuple in transformers (see doc)
-        # domain_loss = outputs[1]
-        # print("domain loss:", domain_loss)
-        # logits = outputs[1]
-        # logits_1 = [x[1] for x in logits.view(-1, 2)]
-
-
-        # preds = torch.argmax(logits, dim=-1)
-        # print("labels:")
-        # print(inputs["labels"])
-
-        # print("logits:")
-        # print(logits_1)
-        # print("preds:")
-        # print(preds)
-        # print("num_masks:")
-        # print(torch.sum(preds))
-
+        
         if self.args.n_gpu > 1:
             loss = loss.mean()  # mean() to average on multi-gpu parallel training
         if self.args.gradient_accumulation_steps > 1:

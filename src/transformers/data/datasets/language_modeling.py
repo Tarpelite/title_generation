@@ -120,11 +120,11 @@ class MaskGenerator:
         all_preds = []
         for instance_logits in logits:
             logits_1 = [ (i,x[1]) for i, x in enumerate(instance_logits)]
-            print("before sorted")
-            print(instance_logits[:10])
+            # print("before sorted")
+            # print(instance_logits[:10])
             sorted_logits_1 = sorted(logits_1, key = lambda x:x[1])
-            print("after sorted")
-            print(sorted_logits_1[:10])
+            # print("after sorted")
+            # print(sorted_logits_1[:10])
             mask_index = sorted_logits_1[:sample_size]
 
             instance_mask = [0]*sequence_size

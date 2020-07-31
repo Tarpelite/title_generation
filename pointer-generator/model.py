@@ -49,6 +49,9 @@ class SummarizationModel(object):
     self._target_batch = tf.placeholder(tf.int32, [hps.batch_size, hps.max_dec_steps], name='target_batch')
     self._dec_padding_mask = tf.placeholder(tf.float32, [hps.batch_size, hps.max_dec_steps], name='dec_padding_mask')
 
+    if FLAGS.adv:
+      self._target_label_batch = tf.placeholder(tf.int32, [hps.batch_size, 1], name="target_label_batch")
+
     if hps.mode=="decode" and hps.coverage:
       self.prev_coverage = tf.placeholder(tf.float32, [hps.batch_size, None], name='prev_coverage')
 
@@ -71,6 +74,8 @@ class SummarizationModel(object):
       feed_dict[self._dec_batch] = batch.dec_batch
       feed_dict[self._target_batch] = batch.target_batch
       feed_dict[self._dec_padding_mask] = batch.dec_padding_mask
+      if FLAGS.adv:
+        feed_dict[self._target_label_batch] = batch.target_label_batch
     return feed_dict
 
   def _add_encoder(self, encoder_inputs, seq_len):
@@ -91,6 +96,7 @@ class SummarizationModel(object):
       cell_bw = tf.contrib.rnn.LSTMCell(self._hps.hidden_dim, initializer=self.rand_unif_init, state_is_tuple=True)
       (encoder_outputs, (fw_st, bw_st)) = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, encoder_inputs, dtype=tf.float32, sequence_length=seq_len, swap_memory=True)
       encoder_outputs = tf.concat(axis=2, values=encoder_outputs) # concatenate the forwards and backwards states
+
     return encoder_outputs, fw_st, bw_st
 
 
@@ -223,6 +229,17 @@ class SummarizationModel(object):
       # Add the decoder.
       with tf.variable_scope('decoder'):
         decoder_outputs, self._dec_out_state, self.attn_dists, self.p_gens, self.coverage = self._add_decoder(emb_dec_inputs)
+      
+      if self._hps.adv:
+        with tf.variable_scope('adv_output'):
+          w_adv = tf.get_variable('w_adv', [hps.hidden_dim, 2], dtype=tf.float32, initializer=self.trunc_norm_init)
+          w_adv_t = tf.transpose(w_adv)
+          v_adv = tf.get_variable('v_adv', [2], dtype=tf.float32, initializer=self.trunc_norm_init)
+
+          # reduce encoder output into [batch_size, hidden_dim]:
+          cls_logits = tf.reduce_sum(enc_outputs, axis=1)
+          cls_score = tf.nn.xw_plus_b(cls_logits, w_adv, v_adv)
+          cls_score = tf.nn.softmax(cls_score)
 
       # Add the output projection to obtain the vocabulary distribution
       with tf.variable_scope('output_projection'):
@@ -258,11 +275,17 @@ class SummarizationModel(object):
               targets = self._target_batch[:,dec_step] # The indices of the target words. shape (batch_size)
               indices = tf.stack( (batch_nums, targets), axis=1) # shape (batch_size, 2)
               gold_probs = tf.gather_nd(dist, indices) # shape (batch_size). prob of correct words on this step
-              losses = -tf.log(gold_probs)
+              losses = -tf.log(gold_probs) 
+
               loss_per_step.append(losses)
 
             # Apply dec_padding_mask and get loss
             self._loss = _mask_and_avg(loss_per_step, self._dec_padding_mask)
+          
+            if FLAGS.adv:
+              labels_targets = self._target_label_batch
+              adv_loss = tf.nn.softmax_cross_entropy_with_logits_v2(labels_targets, cls_score, axis=-1)
+              self._loss += adv_loss
 
           else: # baseline model
             self._loss = tf.contrib.seq2seq.sequence_loss(tf.stack(vocab_scores, axis=1), self._target_batch, self._dec_padding_mask) # this applies softmax internally
@@ -416,6 +439,8 @@ class SummarizationModel(object):
     if self._hps.coverage:
       feed[self.prev_coverage] = np.stack(prev_coverage, axis=0)
       to_return['coverage'] = self.coverage
+    
+
 
     results = sess.run(to_return, feed_dict=feed) # run the decoder step
 
@@ -478,3 +503,5 @@ def _coverage_loss(attn_dists, padding_mask):
     coverage += a # update the coverage vector
   coverage_loss = _mask_and_avg(covlosses, padding_mask)
   return coverage_loss
+
+
