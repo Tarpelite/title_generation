@@ -1182,7 +1182,7 @@ class GANTrainer:
                     self.args.device
                 )
                 epoch_iterator = tqdm(parallel_loader, desc="Iter (loss=X.XXX)", disable=not self.is_local_master())
-            else:s
+            else:
                 epoch_iterator = tqdm(train_dataloader, desc="Iter (loss=X.XXX)", disable=not self.is_local_master())
 
             for step, inputs in enumerate(epoch_iterator):
