@@ -355,11 +355,11 @@ def main():
                 tokenizer = tokenizer,
                 selector = mask_selector
             )
-             train_sampler = (
-                    RandomSampler(train_dataset)
-                    if training_args.local_rank == -1
-                    else DistributedSampler(train_dataset)
-                )
+            train_sampler = (
+                RandomSampler(train_dataset)
+                if training_args.local_rank == -1
+                else DistributedSampler(train_dataset)
+            )
 
             train_dataloader  = DataLoader(
                 train_dataset,
