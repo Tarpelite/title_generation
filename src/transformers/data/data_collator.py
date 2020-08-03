@@ -148,6 +148,32 @@ class DataCollatorForLanguageModeling(DataCollator):
         return inputs, labels
 
 
+@dataclass
+
+class DataCollatorForCheckMin(DataCollator):
+    tokenizer: PreTrainedTokenizer
+    selector: MaskSelector
+    
+
+    def collate_batch(self, examples:List):
+        all_inputs = []
+        all_labels = []
+        for instance in examples:
+            all_inputs.append(instance["input_ids"])
+            sl_labels = []
+            mask_token_id = self.tokenizer.convert_tokens_to_ids(self.tokenizer.mask_token)
+            for i in instance["labels"]:
+                if i !=-100 :
+                    sl_labels.append(1)
+                else:
+                    sl_labels.append(0)
+            all_labels.append(sl_labels)
+        
+        scorer_inputs = {
+            "input_ids":torch.stack(all_inputs, dim=0),
+        }
+        score = self.selector.score(scorer_input)
+        return score
 
 @dataclass
 class DataCollatorForCheckMaskGen(DataCollator):

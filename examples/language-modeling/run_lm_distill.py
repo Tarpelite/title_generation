@@ -40,6 +40,7 @@ from transformers import (
     DataCollatorForSelectLM,
     DataCollatorForDistillLM,
     DataCollatorForTrainGen,
+    DataCollatorForCheckMin,
     HfArgumentParser,
     LineByLineTextDataset,
     FullyLineByLineTextDataset,
@@ -156,6 +157,9 @@ class DataTrainingArguments:
 
     train_gen: bool = field(
         default=False, metadata={"help": "Overwrite the cached training and evaluation sets"}
+    )
+    check:bool = field(
+        default=False, metadata={"help": "Overwrite the cached training and evaluation sets"
     )
 
 
@@ -345,6 +349,35 @@ def main():
         data_collator = DataCollatorForTrainGen(
             tokenizer = tokenizer
         )
+
+        if data_args.check:
+            data_collator = DataCollatorForCheckMin(
+                tokenizer = tokenizer,
+                selector = mask_selector
+            )
+             train_sampler = (
+                    RandomSampler(train_dataset)
+                    if training_args.local_rank == -1
+                    else DistributedSampler(train_dataset)
+                )
+
+            train_dataloader  = DataLoader(
+                train_dataset,
+                batch_size=128,
+                sampler = train_sampler,
+                collate_fn = data_collator.collate_batch,
+                drop_last = False,
+            )
+            all_scores = []
+
+            epoch_iterator = tqdm(train_dataloader)
+            for score in epoch_iterator:
+                # print(score)
+                all_scores.extend(score)
+            
+            print("avg tgt score:")
+            print(sum(all_scores)/ len(all_scores))
+            exit()
 
         # Initialize our Trainer
         trainer = Trainer(
