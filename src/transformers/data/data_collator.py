@@ -172,7 +172,7 @@ class DataCollatorForCheckMin(DataCollator):
         scorer_inputs = {
             "input_ids":torch.stack(all_inputs, dim=0),
         }
-        score = self.selector.score(scorer_input)
+        score = self.selector.score(scorer_inputs)
         return score
 
 @dataclass
