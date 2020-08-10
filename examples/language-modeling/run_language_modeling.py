@@ -145,7 +145,7 @@ def get_dataset(args: DataTrainingArguments, tokenizer: PreTrainedTokenizer,mode
         if args.mlm_sample_times > 1:
             return FullyLineByLineTextDataset(tokenizer=tokenizer, file_path=file_path, block_size=args.block_size, cache_dir=model_args.cache_dir)
         else:
-            return LineByLineTextDataset(tokenizer=tokenizer, file_path=file_path, block_size=args.block_size)
+            return LineByLineTextDataset(tokenizer=tokenizer, file_path=file_path, block_size=args.block_size, cache_dir=model_args.cache_dir)
     else:
         return TextDataset(
             tokenizer=tokenizer, file_path=file_path, block_size=args.block_size, overwrite_cache=args.overwrite_cache

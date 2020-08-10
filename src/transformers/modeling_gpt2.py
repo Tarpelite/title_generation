@@ -118,7 +118,7 @@ class Attention(nn.Module):
         self.split_size = n_state
         self.scale = scale
 
-        self.c_attn = Conv1D(n_state * 3, nx)
+        self.c_attn = Conv1D(n_state * 3, nx) # torch.view * 2, torch.add 1, torch.mm 1
         self.c_proj = Conv1D(n_state, nx)
         self.attn_dropout = nn.Dropout(config.attn_pdrop)
         self.resid_dropout = nn.Dropout(config.resid_pdrop)
@@ -208,10 +208,11 @@ class Attention(nn.Module):
 
 
 class MLP(nn.Module):
+    
     def __init__(self, n_state, config):  # in MLP: n_state=3072 (4 * n_embd)
         super().__init__()
         nx = config.n_embd
-        self.c_fc = Conv1D(n_state, nx)
+        self.c_fc = Conv1D(n_state, nx) # torch.view * 2, torch.add 1, torch.mm 1
         self.c_proj = Conv1D(nx, n_state)
         self.act = ACT2FN[config.activation_function]
         self.dropout = nn.Dropout(config.resid_pdrop)
@@ -226,10 +227,10 @@ class Block(nn.Module):
     def __init__(self, n_ctx, config, scale=False):
         super().__init__()
         nx = config.n_embd
-        self.ln_1 = nn.LayerNorm(nx, eps=config.layer_norm_epsilon)
-        self.attn = Attention(nx, n_ctx, config, scale)
+        self.ln_1 = nn.LayerNorm(nx, eps=config.layer_norm_epsilon) 
+        self.attn = Attention(nx, n_ctx, config, scale) # torch.view 8, torch.add 2, torch.mm 4, torch.split 1, torch.permute 4, torch.softmax 1, torch.dropout 2
         self.ln_2 = nn.LayerNorm(nx, eps=config.layer_norm_epsilon)
-        self.mlp = MLP(4 * nx, config)
+        self.mlp = MLP(4 * nx, config) # torch.view 4, torch.add 2, torch.mm 2, torch.pow 1, torch.add 2, torch.dot_mm 4 torch.dropout 1
 
     def forward(
         self, x, layer_past=None, attention_mask=None, head_mask=None, use_cache=False, output_attentions=False,
